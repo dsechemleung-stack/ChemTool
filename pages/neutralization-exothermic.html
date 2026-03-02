@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why is CH₃COOH + NaOH less exothermic?</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--border:#212d3d;
+  --hcl:#ff6b35;--ace:#4da6ff;--oh:#22c55e;--water:#38bdf8;
+  --h:#fbbf24;--bond:#a855f7;--heat:#f97316;
+  --text:#e6edf3;--dim:#8b949e;--muted:#484f58;
+  --green:#22c55e;--red:#ef4444;--purple:#a855f7;--cyan:#38bdf8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+body.focusModalOpen{overflow:hidden}
+
+/* TOP BAR */
+.top-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.top-title{font-size:clamp(.95rem,2.2vw,1.3rem);font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.top-title em{color:var(--ace);font-style:normal}
+.step-track{display:flex;align-items:center;gap:.4rem}
+.sdot{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);cursor:pointer;transition:all .25s;flex-shrink:0}
+.sdot.active{border-color:var(--ace);background:rgba(77,166,255,.15);color:var(--ace)}
+.sdot.done{border-color:var(--green);background:rgba(34,197,94,.1);color:var(--green)}
+.sline{width:20px;height:2px;background:var(--border);border-radius:2px;transition:background .3s}
+.sline.done{background:var(--green)}
+
+/* NARRATIVE */
+.narr-row{padding:.85rem 1.75rem;display:flex;gap:.85rem;align-items:flex-start}
+.narr-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 1.4rem 1rem 1.6rem;position:relative;overflow:hidden;min-height:76px}
+.narr-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.nc-orange::before{background:var(--hcl)}.nc-blue::before{background:var(--ace)}
+.nc-purple::before{background:var(--purple)}.nc-green::before{background:var(--green)}
+.narr-step{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.narr-text{font-size:clamp(.85rem,1.7vw,1rem);line-height:1.65;color:var(--text)}
+.narr-text .o{color:var(--hcl);font-weight:600}.narr-text .b{color:var(--ace);font-weight:600}
+.narr-text .g{color:var(--green);font-weight:600}.narr-text .p{color:var(--purple);font-weight:600}
+.narr-text strong{font-weight:600}
+.nav-col{display:flex;flex-direction:column;gap:.45rem;flex-shrink:0}
+.btn{padding:.55rem 1.1rem;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn:hover{border-color:var(--ace);color:var(--ace)}
+.btn.primary{background:var(--ace);color:#000;border-color:var(--ace);font-weight:700}
+.btn.primary:hover{background:#6bbfff}
+
+/* OVERVIEW SPLIT */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 1.5rem}
+@media(max-width:680px){.split{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.ph{padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pl .ph{background:linear-gradient(120deg,rgba(255,107,53,.1),transparent)}
+.pr .ph{background:linear-gradient(120deg,rgba(77,166,255,.1),transparent)}
+.pname{font-family:'Space Mono',monospace;font-size:.9rem;font-weight:700}
+.pl .pname{color:var(--hcl)}.pr .pname{color:var(--ace)}
+.psub{font-size:.72rem;color:var(--muted);font-family:'Space Mono',monospace}
+.tbadge{font-family:'Space Mono',monospace;font-size:.78rem;padding:.28rem .7rem;border-radius:999px;border:1px solid;transition:all .4s}
+.pl .tbadge{border-color:rgba(255,107,53,.35);color:var(--hcl);background:rgba(255,107,53,.08)}
+.pr .tbadge{border-color:rgba(77,166,255,.35);color:var(--ace);background:rgba(77,166,255,.08)}
+.cw{position:relative;background:#070b10;flex:1}
+.cw canvas{display:block;width:100%;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:.35rem .9rem;padding:.55rem 1.1rem;border-top:1px solid var(--border);background:#0a0e14}
+.li{display:flex;align-items:center;gap:.35rem;font-size:.68rem;color:var(--dim);font-family:'Space Mono',monospace}
+.ld{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.hs{padding:.65rem 1.1rem .75rem;border-top:1px solid var(--border);background:var(--surface2);display:flex;flex-direction:column;gap:.4rem}
+.hrow{display:flex;align-items:center;gap:.6rem}
+.hlbl{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;min-width:68px}
+.htrack{flex:1;height:13px;background:#0a0e14;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.hfill{height:100%;border-radius:999px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.pl .hfill{background:linear-gradient(90deg,#c2410c,#f97316,#fb923c)}
+.pr .hfill{background:linear-gradient(90deg,#1d4ed8,#3b82f6,#60a5fa)}
+.bfill{background:linear-gradient(90deg,#6d28d9,#a855f7,#c084fc)}
+.btrack{border:1px solid rgba(168,85,247,.3)!important}
+.hnum{font-family:'Space Mono',monospace;font-size:.76rem;font-weight:700;min-width:36px;text-align:right;transition:color .3s}
+.pl .hnum{color:var(--hcl)}.pr .hnum{color:var(--ace)}
+.bnum{color:var(--purple)!important}
+.bond-row{opacity:0;transition:opacity .5s}
+.bond-row.vis{opacity:1}
+
+/* ═══ FOCUSED VIEW ═══ */
+#focusSection{display:none;padding:.8rem 1.5rem .6rem}
+
+.focusOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:999;display:none}
+.focusModalOpen .focusOverlay{display:block}
+.focusModalOpen .split,.focusModalOpen .top-bar,.focusModalOpen .narr-row,.focusModalOpen .mf-section{display:none!important}
+.focusModalOpen #focusSection{display:block;position:fixed;inset:0;z-index:1000;background:var(--bg);padding:1rem 1.25rem;overflow:auto}
+.focusModalOpen .focus-grid .focus-cw{min-height:320px}
+
+.focus-actions{display:flex;gap:.5rem;align-items:center;margin-left:auto}
+.focus-iconbtn{appearance:none;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);padding:.42rem .7rem;border-radius:10px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase}
+.focus-iconbtn:hover{border-color:var(--ace);color:var(--ace)}
+
+.focus-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.7rem;flex-wrap:wrap}
+.focus-title{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}
+.focus-badge{font-family:'Space Mono',monospace;font-size:.6rem;padding:.18rem .55rem;border-radius:999px;background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.3);letter-spacing:.1em;text-transform:uppercase}
+
+/* Playback controls */
+.focus-controls{
+  display:flex;align-items:center;gap:.75rem;flex:1;min-width:240px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:.45rem .8rem;
+}
+.play-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--ace);border:none;color:#000;
+  font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .2s;font-weight:700;
+}
+.play-btn:hover{background:#6bbfff}
+
+/* Scrubber with phase markers */
+.scrubber-outer{flex:1;position:relative;height:28px;display:flex;align-items:center}
+
+/* Phase ticks (CH₃COOH side reference) */
+.phase-ticks{
+  position:absolute;top:0;left:0;right:0;height:12px;
+  pointer-events:none;
+}
+.ptick{
+  position:absolute;top:1px;transform:translateX(-50%);
+  font-family:'Space Mono',monospace;font-size:.52rem;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+}
+.ptick-line{width:1px;height:6px;background:var(--border)}
+
+input[type=range]#focusScrubber{
+  position:absolute;bottom:0;left:0;right:0;
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:5px;border-radius:999px;outline:none;cursor:pointer;
+  background:linear-gradient(90deg,var(--ace) var(--sp,0%),var(--border) var(--sp,0%));
+}
+input[type=range]#focusScrubber::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--ace);border:2px solid #0d1117;cursor:pointer;
+  box-shadow:0 0 6px rgba(77,166,255,.5);
+}
+
+.focus-time{
+  font-family:'Space Mono',monospace;font-size:.7rem;color:var(--dim);
+  min-width:32px;text-align:right;flex-shrink:0;
+}
+
+/* Focus grid */
+.focus-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:680px){.focus-grid{grid-template-columns:1fr}}
+
+.focus-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.focus-ph{padding:.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.fp-left{background:linear-gradient(120deg,rgba(255,107,53,.08),transparent)}
+.fp-right{background:linear-gradient(120deg,rgba(77,166,255,.08),transparent)}
+.focus-ph-name{font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700}
+.fp-left .focus-ph-name{color:var(--hcl)}.fp-right .focus-ph-name{color:var(--ace)}
+.focus-ph-tag{font-family:'Space Mono',monospace;font-size:.6rem;padding:.15rem .5rem;border-radius:999px}
+.fp-left .focus-ph-tag{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.fp-right .focus-ph-tag{background:rgba(168,85,247,.1);color:var(--purple);border:1px solid rgba(168,85,247,.25)}
+
+.focus-cw{background:#060a0f;position:relative}
+.focus-cw canvas{display:block;width:100%;height:100%}
+
+/* Phase label under each focus canvas */
+.focus-phase-lbl{
+  padding:.5rem 1rem;border-top:1px solid var(--border);background:var(--surface2);
+  min-height:44px;display:flex;align-items:center;gap:.5rem;
+}
+.fpl-num{
+  font-family:'Space Mono',monospace;font-size:.62rem;padding:.1rem .38rem;
+  border-radius:4px;flex-shrink:0;
+}
+.fp-left .fpl-num{background:rgba(255,107,53,.15);color:var(--hcl)}
+.fp-right .fpl-num{background:rgba(168,85,247,.15);color:var(--purple)}
+.fpl-text{font-size:.8rem;line-height:1.45;color:var(--dim)}
+.fpl-text strong{color:var(--text);font-weight:600}
+
+/* MYTH/FACT */
+.mf-section{padding:.75rem 1.5rem 1.1rem;display:none}
+.mf-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:640px){.mf-card{grid-template-columns:1fr}}
+.mf-half{padding:1rem 1.25rem}
+.mf-half:first-child{border-right:1px solid var(--border);background:rgba(239,68,68,.04)}
+.mf-half:last-child{background:rgba(34,197,94,.04)}
+.mf-tag{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:.18rem .55rem;border-radius:999px;margin-bottom:.55rem;display:inline-block}
+.mf-tag.myth{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+.mf-tag.fact{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.mf-body{font-size:clamp(.78rem,1.3vw,.88rem);line-height:1.65;color:var(--dim)}
+.mf-body strong{color:var(--text);font-weight:600}
+.mf-eq{margin-top:.65rem;display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;font-family:'Space Mono',monospace;font-size:.7rem}
+.chip{padding:.18rem .5rem;border-radius:6px;font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;border:1.5px solid}
+.chip-h{background:rgba(251,191,36,.14);color:#fbbf24;border-color:rgba(251,191,36,.4)}
+.chip-oh{background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.35)}
+.chip-ha{background:linear-gradient(90deg,rgba(251,191,36,.14) 0 50%,rgba(185,28,28,.14) 50% 100%);color:var(--text);border-color:rgba(251,191,36,.35)}
+.chip-a{background:rgba(185,28,28,.12);color:#fecaca;border-color:rgba(185,28,28,.35)}
+.chip-w{background:rgba(56,189,248,.12);color:var(--cyan);border-color:rgba(56,189,248,.35)}
+.chip-heat{background:rgba(249,115,22,.12);color:#fb923c;border-color:rgba(249,115,22,.3)}
+.chip-bond{background:rgba(168,85,247,.12);color:var(--purple);border-color:rgba(168,85,247,.3)}
+.chip-less{background:rgba(56,189,248,.12);color:var(--cyan);border-color:rgba(56,189,248,.3)}
+.sym{color:var(--muted);font-size:.8rem}
+.eq-label{font-size:.65rem;color:var(--muted)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<div class="focusOverlay" id="focusOverlay" hidden></div>
+
+<div class="top-bar">
+  <div class="top-title">Why is <em>CH₃COOH + NaOH</em> less exothermic than HCl + NaOH?</div>
+  <div class="step-track">
+    <div class="sdot active" onclick="goStep(0)">1</div>
+    <div class="sline" id="l01"></div>
+    <div class="sdot" onclick="goStep(1)">2</div>
+    <div class="sline" id="l12"></div>
+    <div class="sdot" onclick="goStep(2)">3</div>
+    <div class="sline" id="l23"></div>
+    <div class="sdot" onclick="goStep(3)">4</div>
+  </div>
+</div>
+
+<div class="narr-row">
+  <div class="narr-card nc-orange" id="nc">
+    <div class="narr-step" id="ns">Scene 1 of 4</div>
+    <div class="narr-text" id="nt"></div>
+  </div>
+  <div class="nav-col">
+    <button class="btn primary" id="btnNext" onclick="nextStep()">Next →</button>
+    <button class="btn" id="pauseSceneBtn" type="button" style="display:none">Pause</button>
+    <div style="display:flex;gap:.4rem">
+      <button class="btn" id="speedBtn1" type="button" style="display:none">x1</button>
+      <button class="btn" id="speedBtn3" type="button" style="display:none">x3</button>
+      <button class="btn" id="speedBtn10" type="button" style="display:none">x10</button>
+    </div>
+    <button class="btn" id="btnPrev" onclick="prevStep()" style="display:none">← Back</button>
+  </div>
+</div>
+
+<!-- OVERVIEW SPLIT -->
+<div class="split">
+  <div class="panel pl">
+    <div class="ph">
+      <div><div class="pname">HCl + NaOH</div><div class="psub">strong acid + strong base</div></div>
+      <div class="tbadge">▲ <span id="tL">0.0</span>°C</div>
+    </div>
+    <div class="cw" style="height:210px"><canvas id="cL"></canvas></div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:#fbbf24"></div>H⁺</div>
+      <div class="li"><div class="ld" style="background:#b91c1c"></div>Cl⁻</div>
+      <div class="li"><div class="ld" style="background:#22c55e"></div>OH⁻</div>
+      <div class="li"><div class="ld" style="background:#38bdf8"></div>H₂O</div>
+      <div class="li"><div class="ld" style="background:#ffffff"></div>Na⁺</div>
+    </div>
+    <div class="hs">
+      <div class="hrow">
+        <span class="hlbl">Heat released</span>
+        <div class="htrack"><div class="hfill" id="hL" style="width:0%"></div></div>
+        <span class="hnum" id="hnL">0%</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel pr">
+    <div class="ph">
+      <div><div class="pname">CH₃COOH + NaOH</div><div class="psub">weak acid + strong base</div></div>
+      <div class="tbadge">▲ <span id="tR">0.0</span>°C</div>
+    </div>
+    <div class="cw" style="height:210px"><canvas id="cR"></canvas></div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:linear-gradient(90deg,#fbbf24 0 50%,#b91c1c 50% 100%)"></div>CH₃COOH (HA)</div>
+      <div class="li"><div class="ld" style="background:#fbbf24"></div>H⁺</div>
+      <div class="li"><div class="ld" style="background:#b91c1c"></div>CH₃COO⁻ (A⁻)</div>
+      <div class="li"><div class="ld" style="background:#22c55e"></div>OH⁻</div>
+      <div class="li"><div class="ld" style="background:#38bdf8"></div>H₂O</div>
+      <div class="li"><div class="ld" style="background:#ffffff"></div>Na⁺</div>
+    </div>
+    <div class="hs">
+      <div class="hrow">
+        <span class="hlbl">Heat released</span>
+        <div class="htrack"><div class="hfill" id="hR" style="width:0%"></div></div>
+        <span class="hnum" id="hnR">0%</span>
+      </div>
+      <div class="hrow bond-row" id="brow">
+        <span class="hlbl" style="color:var(--purple)">Heat absorbed</span>
+        <div class="htrack btrack"><div class="hfill bfill" id="bF" style="width:0%"></div></div>
+        <span class="hnum bnum" id="bN">0%</span>
+        <span class="hnum" id="bondCount" style="color:var(--purple);margin-left:8px;font-size:0.65rem">0 bonds</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOCUSED VIEW (step 2 only) ═══ -->
+<div id="focusSection">
+  <div class="focus-header">
+    <span class="focus-title">Close-up — one reaction at a time</span>
+    <span class="focus-badge">zoom in</span>
+    <div class="focus-actions">
+      <button class="focus-iconbtn" id="focusOpenBtn" type="button">Full screen</button>
+      <button class="focus-iconbtn" id="focusCloseBtn" type="button" hidden>Close</button>
+    </div>
+    <!-- Playback controls -->
+    <div class="focus-controls">
+      <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+      <div class="scrubber-outer">
+        <div class="phase-ticks">
+          <!-- right-side phase markers at 35%, 60%, 80% -->
+          <div class="ptick" style="left:35%"><div class="ptick-line"></div><span>bond</span></div>
+          <div class="ptick" style="left:60%"><div class="ptick-line"></div><span>H⁺ free</span></div>
+          <div class="ptick" style="left:80%"><div class="ptick-line"></div><span>H₂O</span></div>
+        </div>
+        <input type="range" id="focusScrubber" min="0" max="1000" value="0"
+               oninput="onScrub(this.value)" style="--sp:0%">
+      </div>
+      <span class="focus-time" id="focusTime">0%</span>
+    </div>
+  </div>
+
+  <div class="focus-grid">
+    <!-- Left: HCl -->
+    <div class="focus-panel fp-left">
+      <div class="focus-ph fp-left">
+        <span class="focus-ph-name">HCl — direct reaction</span>
+        <span class="focus-ph-tag">1 step</span>
+      </div>
+      <div class="focus-cw" style="height:190px"><canvas id="fL"></canvas></div>
+      <div class="focus-phase-lbl fp-left" id="lblL">
+        <span class="fpl-num">①</span>
+        <span class="fpl-text" id="lblLText">OH⁻ moves toward the <strong style="color:#fbbf24">free H⁺</strong> — it is already separate, no bond to break</span>
+      </div>
+    </div>
+    <!-- Right: CH₃COOH -->
+    <div class="focus-panel fp-right">
+      <div class="focus-ph fp-right">
+        <span class="focus-ph-name">CH₃COOH — two steps</span>
+        <span class="focus-ph-tag">2 steps</span>
+      </div>
+      <div class="focus-cw" style="height:190px"><canvas id="fR"></canvas></div>
+      <div class="focus-phase-lbl fp-right" id="lblR">
+        <span class="fpl-num" id="lblRNum">①</span>
+        <span class="fpl-text" id="lblRText">OH⁻ approaches the <strong style="color:#4da6ff">CH₃COOH molecule</strong> — H is locked inside by a bond</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MYTH/FACT (step 4 only) -->
+<div class="mf-section" id="mfSec">
+  <div class="mf-card anim">
+    <div class="mf-half">
+      <span class="mf-tag myth">❌ Common Misconception</span>
+      <div class="mf-body">
+        <strong>"CH₃COOH doesn't fully react with NaOH — it's a weak acid, so it only partially ionizes. Less neutralisation happens, which is why less heat is produced."</strong>
+        <br><br>This sounds logical — but look at the animation. <strong>Both reactions go to completion.</strong> The answer is elsewhere.
+      </div>
+      <div class="mf-eq">
+        <span style="color:#f87171;font-size:.65rem">What students assume:</span>
+      </div>
+      <div class="mf-eq" style="margin-top:.3rem">
+        <span class="chip chip-ha">CH₃COOH</span>
+        <span class="sym">+</span>
+        <span class="chip chip-oh">OH⁻</span>
+        <span class="sym">→</span>
+        <span style="color:#f87171">partial reaction only ✗</span>
+      </div>
+    </div>
+    <div class="mf-half">
+      <span class="mf-tag fact">✓ What actually happens</span>
+      <div class="mf-body">
+        CH₃COOH <strong>does fully react</strong> with NaOH — every molecule is neutralised, just like HCl. The real reason for less heat is that <strong>the O–H bond inside CH₃COOH must be broken first</strong>. Breaking that bond uses up energy — that energy is taken away from what reaches the surroundings.
+      </div>
+      <div class="mf-eq">
+        <span class="chip chip-ha">CH₃COOH</span>
+        <span class="sym">→</span>
+        <span class="chip chip-h">H⁺</span>
+        <span class="sym">+</span>
+        <span class="chip chip-a">CH₃COO⁻</span>
+        <span class="chip chip-bond">uses energy</span>
+      </div>
+      <div class="mf-eq" style="margin-top:.3rem">
+        <span class="chip chip-h">H⁺</span>
+        <span class="sym">+</span>
+        <span class="chip chip-oh">OH⁻</span>
+        <span class="sym">→</span>
+        <span class="chip chip-w">H₂O</span>
+        <span class="sym">+</span>
+        <span class="chip chip-heat">▲ temperature</span>
+      </div>
+      <div class="mf-eq" style="margin-top:.45rem;align-items:center">
+        <span class="eq-label">Net heat =</span>
+        <span class="chip chip-heat">max heat</span>
+        <span style="color:var(--red);font-weight:700;font-size:.9rem">−</span>
+        <span class="chip chip-bond">heat used to break bond</span>
+        <span class="sym">=</span>
+        <span class="chip chip-less">less heat out</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// STEP DATA
+// ════════════════════════════════════════════════════════════
+const STEPS=[
+  {
+    scene:'Scene 1 of 4 — Before reaction',theme:'nc-orange',
+    text:`Look at the two beakers before any NaOH is added.<br>
+In <span class="o">HCl</span>, the acid is <strong>already split apart</strong> — H⁺ ions are floating freely, ready to react the moment OH⁻ arrives.<br>
+In <span class="b">CH₃COOH</span>, the acid is <strong>only partially ionised</strong>: some molecules remain intact (<strong>HA</strong>), while some have already formed <strong>H⁺ + CH₃COO⁻</strong>. The remaining H is still locked inside intact HA by an O–H bond.`,
+    mode:'before',misc:false,bond:false,focus:false,hL:0,hR:0,bR:0,tL:0,tR:0
+  },
+  {
+    scene:'Scene 2 of 4 — NaOH added',theme:'nc-blue',
+    text:`NaOH is added to both beakers. In <span class="o">HCl</span>, OH⁻ finds a free H⁺ and reacts <strong>immediately</strong> — heat reaches the surroundings right away.<br>
+In <span class="b">CH₃COOH</span>, OH⁻ must first <span class="p">break the O–H bond inside the molecule</span> before H⁺ can be released. That bond-breaking <span class="p">uses up energy</span>, so less heat reaches the surroundings.<br>
+<strong>Use the close-up player below ↓ to see each step.</strong>`,
+    mode:'reacting',misc:false,bond:true,focus:true,hL:58,hR:55,bR:3,tL:5.3,tR:5.0
+  },
+  {
+    scene:'Scene 3 of 4 — Both fully neutralised',theme:'nc-green',
+    text:`Both reactions are <span class="g">now complete</span>. Every acid molecule has been neutralised — the CH₃COOH beaker is <strong>not partially reacted</strong>. But its temperature rise is <strong>smaller</strong> because energy was used breaking O–H bonds before heat could be produced. <span class="p">Heat absorbed → less heat reaches the surroundings.</span>`,
+    mode:'complete',misc:false,bond:true,focus:false,hL:100,hR:100,bR:5,tL:8.7,tR:8.4
+  },
+  {
+    scene:'Scene 4 of 4 — The explanation',theme:'nc-purple',
+    text:`<span class="o">HCl + NaOH:</span> H⁺ already free → OH⁻ reacts directly → <strong>all energy becomes heat</strong><br>
+<span class="b">CH₃COOH + NaOH:</span> H⁺ locked in a bond → bond must break first → that step <span class="p">absorbs energy (heat absorbed)</span> from what reaches the surroundings<br>
+<strong>Same acid amount. Same base amount. Both fully reacted. But a different internal energy cost along the way.</strong>`,
+    mode:'complete',misc:true,bond:true,focus:false,hL:100,hR:100,bR:5,tL:8.7,tR:8.4
+  }
+];
+let cur=0;
+
+// ════════════════════════════════════════════════════════════
+// OVERVIEW PARTICLE SYSTEM
+// ════════════════════════════════════════════════════════════
+const PT={
+  H:  {r:7, c:'#fbbf24',lbl:'H⁺', glow:'rgba(251,191,36,.55)'},
+  Cl: {r:9, c:'#b91c1c',lbl:'Cl⁻',glow:'rgba(185,28,28,.55)'},
+  OH: {r:8, c:'#22c55e',lbl:'OH⁻',glow:'rgba(34,197,94,.5)'},
+  Na: {r:8, c:'#ffffff',lbl:'Na⁺',glow:'rgba(255,255,255,.35)'},
+  HA: {r:14,c:'#fbbf24',lbl:'HA', glow:'rgba(251,191,36,.45)'},
+  A:  {r:11,c:'#b91c1c',lbl:'A⁻', glow:'rgba(185,28,28,.55)'},
+  H2O:{r:7, c:'#38bdf8',lbl:'H₂O',glow:'rgba(56,189,248,.4)'},
+  HEAT:{r:5,c:'#f97316',lbl:'▲',  glow:'rgba(249,115,22,.9)'},
+  BOND:{r:4,c:'#a855f7',lbl:'⬡',  glow:'rgba(168,85,247,.9)'}
+};
+
+const MAX_OH=14;
+
+class Particle{
+  constructor(x,y,type,W,H){
+    this.x=x;this.y=y;this.type=type;
+    // Base speeds - higher so x10 speed multiplier is effective
+    // A⁻ moves slower (formed when HA breaks)
+    let baseSpeed;
+    if(type==='A') baseSpeed=0.4;
+    else if(type==='OH'||type==='H') baseSpeed=1.8;
+    else baseSpeed=1.05;
+    this.vx=(Math.random()-.5)*baseSpeed;this.vy=(Math.random()-.5)*baseSpeed;
+    this.W=W;this.H=H;this.ph=Math.random()*Math.PI*2;
+    this.life=1;this.dieRate=0;this.dying=false;
+    this.glowing=false;this.glowT=0;this.bondGlow=false;this.bgT=0;
+    this.cooldown=0;
+    this.settle=0;
+  }
+  get cfg(){return PT[this.type]||PT.H}
+  update(spd){
+    spd=spd===undefined?1:spd;
+    this.ph+=0.04*spd;
+    if(this.settle>0){
+      this.x+=this.vx*spd;this.y+=this.vy*spd;
+      this.vx*=Math.pow(0.92,spd);
+      this.vy*=Math.pow(0.92,spd);
+      this.settle-=spd;
+      if(this.settle<=0){
+        this.settle=0;
+        let baseSpeed;
+        if(this.type==='A') baseSpeed=0.4;
+        else if(this.type==='OH'||this.type==='H') baseSpeed=1.8;
+        else baseSpeed=1.05;
+        this.vx=(Math.random()-.5)*baseSpeed;
+        this.vy=(Math.random()-.5)*baseSpeed;
+      }
+    }else{
+      this.x+=this.vx*spd;this.y+=this.vy*spd;
+    }
+    if(this.cooldown>0) this.cooldown--;
+    const r=this.cfg.r;
+    if(this.x<r){this.x=r;this.vx*=-1}if(this.x>this.W-r){this.x=this.W-r;this.vx*=-1}
+    if(this.y<r){this.y=r;this.vy*=-1}if(this.y>this.H-r){this.y=this.H-r;this.vy*=-1}
+    if(this.dying)this.life-=this.dieRate;
+    if(this.glowing){this.glowT--;if(this.glowT<=0)this.glowing=false}
+    if(this.bondGlow){this.bgT--;if(this.bgT<=0)this.bondGlow=false}
+  }
+  draw(ctx){
+    if(this.life<=0)return;
+    const cfg=this.cfg,pulse=1+Math.sin(this.ph)*.07,r=cfg.r*pulse;
+    ctx.save();ctx.globalAlpha=this.life;
+    if(this.glowing||this.bondGlow||this.type==='HEAT'||this.type==='BOND'){
+      ctx.shadowColor=this.bondGlow?'#a855f7':cfg.glow;
+      ctx.shadowBlur=this.bondGlow?18:16;
+    }
+    ctx.beginPath();ctx.arc(this.x,this.y,r,0,Math.PI*2);
+    if(this.type==='HA'){
+      const g=ctx.createLinearGradient(this.x-r,this.y,this.x+r,this.y);
+      g.addColorStop(0,'#fbbf24');
+      g.addColorStop(0.5,'#fbbf24');
+      g.addColorStop(0.5,'#b91c1c');
+      g.addColorStop(1,'#b91c1c');
+      ctx.fillStyle=g;
+    }else{
+      ctx.fillStyle=cfg.c;
+    }
+    ctx.fill();
+    const g=ctx.createRadialGradient(this.x-r*.3,this.y-r*.3,r*.05,this.x,this.y,r);
+    g.addColorStop(0,'rgba(255,255,255,.2)');g.addColorStop(1,'rgba(0,0,0,.05)');
+    ctx.fillStyle=g;ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.font=`bold ${Math.max(7,r*.82)}px Space Mono,monospace`;
+    ctx.fillStyle=(this.type==='H'||this.type==='Na')?'#000':'#fff';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(this.type==='HA'?'HA':cfg.lbl,this.x,this.y);
+    ctx.restore();
+  }
+  kill(rate=0.045){this.dying=true;this.dieRate=rate}
+  bondFlash(){this.bondGlow=true;this.bgT=38}
+}
+
+class Sim{
+  constructor(id,strong){
+    this.cv=document.getElementById(id);this.ctx=this.cv.getContext('2d');
+    this.strong=strong;this.ps=[];this.sparks=[];
+    this.mode='before';this.frame=0;this.W=1;this.H=1;
+    this.pouring=false;this.pourRemaining=0;this.pourT=0;
+    this.totalAcid=0;this.bondsBroken=0;this.h2oFormed=0;
+    this._resize();this._pop('before');this._loop();
+  }
+  _resize(){
+    const rect=this.cv.parentElement.getBoundingClientRect();
+    this.W=rect.width;this.H=rect.height||210;
+    const dpr=window.devicePixelRatio||1;
+    this.cv.width=this.W*dpr;this.cv.height=this.H*dpr;
+    this.cv.style.width=this.W+'px';this.cv.style.height=this.H+'px';
+    this.ctx.scale(dpr,dpr);
+  }
+  _pop(mode){
+    this.ps=[];this.sparks=[];
+    const rnd=(a,b)=>a+Math.random()*(b-a),W=this.W,H=this.H;
+    if(mode==='complete'){
+      for(let i=0;i<11;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'H2O',W,H));
+      if(this.strong){for(let i=0;i<7;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'Cl',W,H))}
+      else{for(let i=0;i<6;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'A',W,H))}
+      for(let i=0;i<5;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'Na',W,H));
+      return;
+    }
+    if(this.strong){
+      for(let i=0;i<9;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'H',W,H));
+      for(let i=0;i<9;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'Cl',W,H));
+    }else{
+      for(let i=0;i<6;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'HA',W,H));
+      for(let i=0;i<4;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'H',W,H));
+      for(let i=0;i<4;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'A',W,H));
+    }
+    if(mode==='reacting'){for(let i=0;i<3;i++)this.ps.push(new Particle(rnd(15,W-15),rnd(15,H-28),'Na',W,H))}
+  }
+  setMode(m){
+    this.mode=m;this.frame=0;this.bondsBroken=0;this.h2oFormed=0;
+    this._pop(m);
+    if(m==='reacting'){
+      this._startPour();
+      if(cur===1){
+        this.totalAcid=this.ps.filter(p=>(p.type==='HA'||p.type==='H')&&!p.dying).length;
+        this.totalHA=this.ps.filter(p=>p.type==='HA'&&!p.dying).length||1;
+        this.bondsBroken=0;this.h2oFormed=0;
+      }
+    }
+    else{this.pouring=false;this.pourRemaining=0;this.pourT=0;}
+  }
+  _startPour(){
+    const target=this.strong
+      ? this.ps.filter(p=>p.type==='H'&&!p.dying).length
+      : (this.ps.filter(p=>p.type==='HA'&&!p.dying).length + this.ps.filter(p=>p.type==='H'&&!p.dying).length);
+    this.pourRemaining=Math.max(0,target);
+    this.pouring=this.pourRemaining>0;
+    this.pourT=0;
+  }
+  _spawnOHFromPour(){
+    if(!this.pouring||this.pourRemaining<=0) return;
+    if(this.ps.filter(p=>p.type==='OH'&&!p.dying).length>=MAX_OH) return;
+    const x=(this.W*0.5)+((Math.random()-.5)*Math.min(64,this.W*0.28));
+    const y=10+Math.random()*8;
+    const oh=new Particle(x,y,'OH',this.W,this.H);
+    oh.vx=(Math.random()-.5)*2.5;
+    oh.vy=5.0+Math.random()*1.5;
+    oh.settle=15;
+    this.ps.push(oh);
+    this.pourRemaining--;
+    if(this.pourRemaining<=0) this.pouring=false;
+  }
+  _heatSpark(x,y,n=4){
+    for(let i=0;i<n;i++){
+      const s=new Particle(x+(Math.random()-.5)*18,y+(Math.random()-.5)*18,'HEAT',this.W,this.H);
+      s.vx=(Math.random()-.5)*3.8;s.vy=(Math.random()-.5)*3.8;s.life=.85;s.kill(.028);this.sparks.push(s);
+    }
+  }
+  _bondSpark(x,y){
+    for(let i=0;i<6;i++){
+      const s=new Particle(x+(Math.random()-.5)*14,y+(Math.random()-.5)*14,'BOND',this.W,this.H);
+      s.vx=(Math.random()-.5)*3.2;s.vy=(Math.random()-.5)*3.2;s.life=.9;s.kill(.032);this.sparks.push(s);
+    }
+  }
+  _loop(){
+    requestAnimationFrame(()=>this._loop());
+    this.frame++;
+    const ctx=this.ctx,W=this.W,H=this.H;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(16,24,36,.95)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=38){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=38){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    const spd=(cur===1&&this.mode==='reacting')?([1,3,10][scene2Speed]):1;
+    const paused=(cur===1&&this.mode==='reacting'&&scene2Paused);
+    if(this.mode==='reacting'&&!paused){
+      if(this.pouring) this.pourT=Math.min(1,this.pourT+0.06);
+      else this.pourT=Math.max(0,this.pourT-0.05);
+      if(this.pouring&&this.frame%10===0) this._spawnOHFromPour();
+
+      if(this.pourT>0){
+        const sx=W*0.5;
+        const top=0;
+        const bot=Math.min(H*0.55,150);
+        ctx.save();
+        ctx.globalAlpha=0.45*this.pourT;
+        ctx.strokeStyle='rgba(34,197,94,0.55)';
+        ctx.lineWidth=6;
+        ctx.lineCap='round';
+        ctx.beginPath();
+        ctx.moveTo(sx,top+4);
+        ctx.lineTo(sx,bot);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+    if(this.mode==='reacting'&&!paused){
+      const ohs=this.ps.filter(p=>p.type==='OH'&&!p.dying);
+      ohs.forEach(oh=>{
+        if(this.strong){
+          const t=this.ps.find(p=>p.type==='H'&&!p.dying&&Math.hypot(p.x-oh.x,p.y-oh.y)<30);
+          if(t){
+            this._heatSpark((oh.x+t.x)/2,(oh.y+t.y)/2,5);
+            const w=new Particle(t.x,t.y,'H2O',W,H);w.vx=(Math.random()-.5);w.vy=(Math.random()-.5);this.ps.push(w);
+            oh.kill(.07);t.kill(.07);
+            if(cur===1) this.h2oFormed++;
+          }
+        }else{
+          const ha=this.ps.find(p=>p.type==='HA'&&!p.dying&&Math.hypot(p.x-oh.x,p.y-oh.y)<34);
+          const h=this.ps.find(p=>p.type==='H'&&!p.dying&&p.cooldown===0&&Math.hypot(p.x-oh.x,p.y-oh.y)<28);
+          if(ha){
+            this._bondSpark(ha.x,ha.y);ha.bondFlash();
+            const hh=new Particle(ha.x+12,ha.y,'H',W,H);hh.vx=1.6;
+            const a=new Particle(ha.x-12,ha.y,'A',W,H);a.vx=-0.3;a.vy=(Math.random()-.5)*0.4;
+            hh.cooldown=14;
+            oh.cooldown=14;
+            this.ps.push(hh,a);
+            ha.kill(.09);
+            if(cur===1) this.bondsBroken++;
+          }else if(h){
+            this._heatSpark((oh.x+h.x)/2,(oh.y+h.y)/2,3);
+            const w=new Particle(h.x,h.y,'H2O',W,H);this.ps.push(w);
+            oh.kill(.07);h.kill(.07);
+            if(cur===1) this.h2oFormed++;
+          }
+        }
+      });
+    }
+    this.ps=this.ps.filter(p=>p.life>0);
+    this.sparks=this.sparks.filter(p=>p.life>0);
+    [...this.ps,...this.sparks].forEach(p=>{
+      if(!paused) p.update(spd);
+      p.draw(ctx);
+    });
+    if(cur===1&&this.mode==='reacting'&&!paused){
+      const total=this.totalAcid||1;
+      const heatReleasedPct=Math.min(100,Math.round((this.h2oFormed/total)*100));
+      const heatAbsorbedPct=this.strong?0:Math.min(5,Math.round((this.bondsBroken/this.totalHA)*5));
+      const hFill=this.strong?document.getElementById('hL'):document.getElementById('hR');
+      const hNum=this.strong?document.getElementById('hnL'):document.getElementById('hnR');
+      const bFill=document.getElementById('bF');
+      const bNum=document.getElementById('bN');
+      if(hFill) hFill.style.width=heatReleasedPct+'%';
+      if(hNum) hNum.textContent=heatReleasedPct+'%';
+      if(!this.strong&&bFill) bFill.style.width=heatAbsorbedPct+'%';
+      if(!this.strong&&bNum) bNum.textContent=heatAbsorbedPct+'%';
+      // Update bond count display
+      const bondCountEl=document.getElementById('bondCount');
+      if(bondCountEl){
+        bondCountEl.textContent=this.bondsBroken+'/'+this.totalHA+' bonds broken';
+      }
+      // Temperature: 100% heat release = 8.7°C, minus heat absorbed (5% max = 0.3°C reduction)
+      const tempEl=document.getElementById(this.strong?'tL':'tR');
+      if(tempEl){
+        const baseTemp=(heatReleasedPct/100)*8.7;
+        const absorbPenalty=(heatAbsorbedPct/5)*0.3; // 5% absorbed = 0.3°C reduction
+        const temp=Math.max(0,baseTemp-absorbPenalty);
+        tempEl.textContent=temp.toFixed(1);
+      }
+    }
+    const cy=H-9;
+    if(this.mode==='before'){
+      ctx.fillStyle=this.strong?'rgba(255,107,53,.6)':'rgba(77,166,255,.6)';
+      ctx.fillText(this.strong?'H⁺ ions free — ready to react instantly':'CH₃COOH intact — H locked inside the molecule',W/2,cy);
+    }else if(this.mode==='reacting'&&!this.strong){
+      ctx.fillStyle='rgba(168,85,247,.7)';
+      ctx.fillText('⬡ Bond-breaking uses energy before H⁺ is released',W/2,cy);
+    }else if(this.mode==='complete'){
+      ctx.fillStyle=this.strong?'rgba(255,107,53,.5)':'rgba(77,166,255,.5)';
+      ctx.fillText('✓ Reaction complete — all acid neutralised',W/2,cy);
+    }
+  }
+  resize(){this._resize();this._pop(this.mode)}
+}
+
+// ════════════════════════════════════════════════════════════
+// FOCUSED VIEW — SCRUBBER-DRIVEN, DETERMINISTIC RENDERING
+// ════════════════════════════════════════════════════════════
+// Progress: 0–1000 integer
+// HCl timeline:   0–500 approach / 500–750 flash&product / 750–1000 show heat
+// CH₃COOH:        0–350 approach / 350–600 bond-break / 600–800 H⁺ released / 800–1000 H₂O+heat
+
+let focusProgress=0;  // 0–1000
+let focusPlaying=false;
+let focusRAF=null;
+let fCanL,fCanR,fCtxL,fCtxR;
+let fWL=1,fHL=1,fWR=1,fHR=1;
+
+function initFocusCanvases(){
+  fCanL=document.getElementById('fL');fCtxL=fCanL.getContext('2d');
+  fCanR=document.getElementById('fR');fCtxR=fCanR.getContext('2d');
+  resizeFocusCanvas(fCanL,fCtxL);resizeFocusCanvas(fCanR,fCtxR);
+  fWL=fCanL.parentElement.getBoundingClientRect().width;
+  fHL=fCanL.parentElement.getBoundingClientRect().height||190;
+  fWR=fCanR.parentElement.getBoundingClientRect().width;
+  fHR=fCanR.parentElement.getBoundingClientRect().height||190;
+}
+
+function resizeFocusCanvas(cv,ctx){
+  const rect=cv.parentElement.getBoundingClientRect();
+  const W=rect.width,H=rect.height||190,dpr=window.devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+  ctx.scale(dpr,dpr);
+}
+
+// Easing
+function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function easeOut(t){return 1-Math.pow(1-t,3)}
+
+// Draw a ball with glow
+function fBall(ctx,x,y,r,col,lbl,glowCol,glowStr=14){
+  const pulse=1+Math.sin(Date.now()*.003)*0.06;
+  const rr=r*pulse;
+  ctx.save();
+  ctx.shadowColor=glowCol||col;ctx.shadowBlur=glowStr;
+  ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);
+  if(lbl==='HA'){
+    const g=ctx.createLinearGradient(x-rr,y,x+rr,y);
+    g.addColorStop(0,'#fbbf24');
+    g.addColorStop(0.5,'#fbbf24');
+    g.addColorStop(0.5,'#b91c1c');
+    g.addColorStop(1,'#b91c1c');
+    ctx.fillStyle=g;
+  }else{
+    ctx.fillStyle=col;
+  }
+  ctx.fill();
+  const g=ctx.createRadialGradient(x-rr*.3,y-rr*.3,rr*.05,x,y,rr);
+  g.addColorStop(0,'rgba(255,255,255,.22)');g.addColorStop(1,'rgba(0,0,0,.06)');
+  ctx.fillStyle=g;ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.font=`bold ${Math.max(8,rr*.85)}px Space Mono,monospace`;
+  ctx.fillStyle=(col==='#fbbf24')?'#000':'#fff';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(lbl,x,y);
+  ctx.restore();
+}
+
+// Dashed motion arrow
+function fArrow(ctx,x1,y1,x2,y2,col){
+  const ang=Math.atan2(y2-y1,x2-x1);
+  ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.globalAlpha=.45;
+  ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-12*Math.cos(ang),y2-12*Math.sin(ang));ctx.stroke();
+  ctx.setLineDash([]);ctx.globalAlpha=.6;ctx.fillStyle=col;
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-12*Math.cos(ang-.4),y2-12*Math.sin(ang-.4));
+  ctx.lineTo(x2-12*Math.cos(ang+.4),y2-12*Math.sin(ang+.4));
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+
+// Heat ripples (no emoji) — concentric expanding rings
+function fHeatRipples(ctx,x,y,intensity,col,time){
+  ctx.save();
+  for(let i=0;i<4;i++){
+    const phase=((time*.0015+i*.25)%1);
+    const r=16+phase*38;
+    const alpha=(1-phase)*0.45*intensity;
+    ctx.globalAlpha=alpha;
+    ctx.strokeStyle=col;ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Heat rays
+function fHeatRays(ctx,x,y,intensity,col){
+  ctx.save();
+  const n=8;
+  for(let i=0;i<n;i++){
+    const ang=(i/n)*Math.PI*2;
+    const r0=20;const r1=r0+10+intensity*14;
+    ctx.globalAlpha=.55*intensity;
+    ctx.strokeStyle=col;ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(x+Math.cos(ang)*r0,y+Math.sin(ang)*r0);
+    ctx.lineTo(x+Math.cos(ang)*r1,y+Math.sin(ang)*r1);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Heat badge  ▲ temperature
+function fHeatBadge(ctx,x,y,alpha,txt,col){
+  ctx.save();ctx.globalAlpha=alpha;
+  const w=154,h=22;
+  ctx.fillStyle=col+'28';ctx.strokeStyle=col+'99';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,h,6);ctx.fill();ctx.stroke();
+  ctx.fillStyle=col;ctx.font='600 10.5px Outfit,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,x,y);
+  ctx.restore();
+}
+
+// Bond-breaking sparks (static positions seeded by angle)
+function fBondSparks(ctx,x,y,t,W,H){
+  const n=12;const seed=1234;
+  for(let i=0;i<n;i++){
+    const ang=(i/n)*Math.PI*2+.3;
+    const spd=2+((i*37)%3);
+    const px=x+Math.cos(ang)*spd*t*30;
+    const py=y+Math.sin(ang)*spd*t*30;
+    if(px<0||px>W||py<0||py>H)continue;
+    const alpha=Math.max(0,1-t*1.8);
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.shadowColor='#a855f7';ctx.shadowBlur=12;
+    ctx.fillStyle='#c084fc';
+    ctx.beginPath();ctx.arc(px,py,3.5,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Label badge at top of canvas
+function fLabel(ctx,W,text,col,y=16){
+  ctx.save();ctx.font='500 11px Outfit,sans-serif';ctx.textAlign='center';
+  ctx.fillStyle=col;ctx.fillText(text,W/2,y);ctx.restore();
+}
+
+// Bond indicator bar (energy absorbed meter)
+function fBondMeter(ctx,x,y,w,fill,label){
+  ctx.save();
+  ctx.fillStyle='rgba(168,85,247,.12)';ctx.strokeStyle='rgba(168,85,247,.35)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(x,y,w,14,7);ctx.fill();ctx.stroke();
+  if(fill>0){
+    ctx.fillStyle='rgba(168,85,247,.5)';
+    ctx.beginPath();ctx.roundRect(x,y,w*fill,14,7);ctx.fill();
+  }
+  ctx.fillStyle='#c084fc';ctx.font='500 9.5px Space Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(label,x+w/2,y+7);
+  ctx.restore();
+}
+
+// ── Draw left focus canvas (HCl side) ──────────────────────
+function drawFocusLeft(p){
+  // p: 0–1000
+  const ctx=fCtxL;
+  const W=fWL,H=fHL;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(14,22,36,.98)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=36){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=36){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  const t=Date.now();
+  const cx=W*.5, cy=H*.46;
+  const H_X=cx-40, H_Y=cy;
+  const OH_X0=W-22, OH_Y0=cy+15;
+
+  if(p<=500){
+    // Phase 1: OH⁻ approaches free H⁺
+    const pr=easeInOut(p/500);
+    const ohx=OH_X0-(OH_X0-(H_X+40))*pr;
+    const ohy=OH_Y0-(OH_Y0-H_Y)*pr;
+    // Also show a Cl⁻ spectator
+    fBall(ctx,cx+52,cy+28,14,'#b91c1c','Cl⁻','rgba(185,28,28,.55)',10);
+    fBall(ctx,H_X,H_Y,18,'#fbbf24','H⁺','rgba(251,191,36,.5)',14);
+    fBall(ctx,ohx,ohy,16,'#22c55e','OH⁻','rgba(34,197,94,.5)',14);
+    if(pr<0.85) fArrow(ctx,ohx,ohy,H_X+22,H_Y,'#22c55e');
+    fLabel(ctx,W,'OH⁻ moves toward free H⁺ — no bond to break','rgba(255,107,53,.6)');
+
+  }else if(p<=750){
+    // Phase 2: Flash on collision
+    const pr=(p-500)/250;
+    const flashA=Math.max(0,1-pr*2.5)*0.85;
+    // White burst
+    if(flashA>0){
+      ctx.save();ctx.globalAlpha=flashA;
+      const grad=ctx.createRadialGradient(cx,cy,2,cx,cy,35);
+      grad.addColorStop(0,'rgba(255,255,255,.9)');grad.addColorStop(1,'rgba(255,170,50,0)');
+      ctx.fillStyle=grad;ctx.beginPath();ctx.arc(cx,cy,35,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+    // H₂O fades in
+    const wFade=easeOut(Math.min(1,(p-520)/200));
+    ctx.save();ctx.globalAlpha=wFade;
+    fBall(ctx,cx-5,cy,19,'#38bdf8','H₂O','rgba(56,189,248,.5)',14);
+    ctx.restore();
+    // Cl⁻ still there
+    fBall(ctx,cx+52,cy+28,14,'#b91c1c','Cl⁻','rgba(185,28,28,.55)',8);
+    fLabel(ctx,W,'H⁺ + OH⁻ → H₂O — reaction occurs','rgba(255,107,53,.6)');
+
+  }else{
+    // Phase 3: H₂O formed, heat released (ripples + rays)
+    const pr=(p-750)/250;
+    fBall(ctx,cx-5,cy,19,'#38bdf8','H₂O','rgba(56,189,248,.5)',14);
+    fBall(ctx,cx+52,cy+28,14,'#b91c1c','Cl⁻','rgba(185,28,28,.55)',8);
+    // Heat ripples — larger, more intense
+    fHeatRipples(ctx,cx-5,cy,pr,'#f97316',t);
+    fHeatRays(ctx,cx-5,cy,pr,'#fb923c');
+    // Heat badge
+    const ba=easeOut(Math.min(1,pr*3));
+    fHeatBadge(ctx,cx-5,H-30,ba,'▲ Temperature rises — heat reaches surroundings','#f97316');
+    fLabel(ctx,W,'Heat released to surroundings','rgba(249,115,22,.65)');
+  }
+}
+
+// ── Draw right focus canvas (CH₃COOH side) ────────────────
+function drawFocusRight(p){
+  // p: 0–1000
+  // Phases: 0–350 approach / 350–600 bond-break / 600–800 H⁺ released & OH moves / 800–1000 H₂O+heat
+
+  const ctx=fCtxR;
+  const W=fWR,H=fHR;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(14,22,36,.98)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=36){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=36){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  const t=Date.now();
+  const cx=W*.44, cy=H*.44;
+  const HA_X=cx, HA_Y=cy;
+  const OH_X0=W-22, OH_Y0=cy+15;
+
+  if(p<=350){
+    // Phase 1: OH⁻ approaches HA
+    const pr=easeInOut(p/350);
+    const ohx=OH_X0-(OH_X0-(HA_X+52))*pr;
+    const ohy=OH_Y0-(OH_Y0-HA_Y)*pr;
+    fBall(ctx,HA_X,HA_Y,22,'#fbbf24','HA','rgba(251,191,36,.45)',14);
+    fBall(ctx,ohx,ohy,16,'#22c55e','OH⁻','rgba(34,197,94,.5)',14);
+    if(pr<0.9) fArrow(ctx,ohx,ohy,HA_X+26,HA_Y,'#22c55e');
+    fLabel(ctx,W,'OH⁻ approaches intact CH₃COOH molecule','rgba(77,166,255,.55)');
+
+  }else if(p<=600){
+    // Phase 2: Bond breaking — HA shakes, purple sparks, OH⁻ stays nearby, energy meter rises
+    const pr=(p-350)/250;
+    const shake=Math.sin(pr*Math.PI*7)*4*(1-pr*.7);
+    // OH⁻ stays close by, pressing on HA
+    fBall(ctx,HA_X+50,HA_Y,16,'#22c55e','OH⁻','rgba(34,197,94,.3)',8);
+    // HA shaking with purple glow
+    ctx.save();
+    ctx.shadowColor='#a855f7';ctx.shadowBlur=20+pr*10;
+    fBall(ctx,HA_X+shake,HA_Y,22,'#fbbf24','HA','rgba(168,85,247,.8)',20);
+    ctx.restore();
+    // Bond sparks emit
+    fBondSparks(ctx,HA_X,HA_Y,pr,W,H);
+    // Bond meter grows
+    const mw=140;
+    fBondMeter(ctx,cx-mw/2,cy-52,mw,pr,'energy absorbed — heat absorbed');
+    fLabel(ctx,W,'Breaking the O–H bond — this absorbs energy (heat absorbed)','rgba(168,85,247,.7)');
+    // "absorbs energy" label near sparks
+    const la=easeOut(Math.min(1,pr*2));
+    ctx.save();ctx.globalAlpha=la;
+    ctx.fillStyle='#c084fc';ctx.font='600 11px Outfit,sans-serif';ctx.textAlign='center';
+    ctx.fillText('⬡ bond breaking (heat absorbed)',HA_X,HA_Y-34);
+    ctx.restore();
+
+  }else if(p<=800){
+    // Phase 3: HA splits → H⁺ drifts left, A⁻ drifts right, OH⁻ now chases H⁺
+    const pr=(p-600)/200;
+    const prE=easeOut(pr);
+    const hx=HA_X-32*prE, hy=HA_Y;
+    const ax=HA_X+34*prE, ay=HA_Y;
+    // OH⁻ was at HA_X+50; now moves toward H⁺
+    const ohx=HA_X+50-(HA_X+50-(hx+28))*easeInOut(Math.min(1,pr*1.8));
+    const fade=Math.min(1,pr*3);
+    ctx.save();ctx.globalAlpha=fade;
+    fBall(ctx,hx,hy,14,'#fbbf24','H⁺','rgba(251,191,36,.5)',12);
+    fBall(ctx,ax,ay,16,'#b91c1c','A⁻','rgba(185,28,28,.55)',10);
+    ctx.restore();
+    fBall(ctx,ohx,HA_Y,16,'#22c55e','OH⁻','rgba(34,197,94,.5)',12);
+    if(pr>0.2) fArrow(ctx,ohx,HA_Y,hx+18,hy,'#22c55e');
+    // show bond meter (full = heat absorbed complete)
+    const mw=140;
+    fBondMeter(ctx,cx-mw/2,cy-52,mw,1,'bond broken — heat absorbed');
+    fLabel(ctx,W,'H⁺ released — OH⁻ now moves toward it','rgba(34,197,94,.6)');
+
+  }else{
+    // Phase 4: H⁺ + OH⁻ → H₂O, smaller heat
+    const pr=(p-800)/200;
+    const hx=HA_X-32, ax=HA_X+34;
+    // H₂O at hx position
+    const flashA=Math.max(0,1-pr*3.5)*0.6;
+    if(flashA>0){
+      ctx.save();ctx.globalAlpha=flashA;
+      const grad=ctx.createRadialGradient(hx,HA_Y,2,hx,HA_Y,28);
+      grad.addColorStop(0,'rgba(255,255,255,.7)');grad.addColorStop(1,'rgba(56,189,248,0)');
+      ctx.fillStyle=grad;ctx.beginPath();ctx.arc(hx,HA_Y,28,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+    const wFade=easeOut(Math.min(1,(p-815)/150));
+    ctx.save();ctx.globalAlpha=wFade;
+    fBall(ctx,hx,HA_Y,16,'#38bdf8','H₂O','rgba(56,189,248,.5)',12);
+    ctx.restore();
+    // A⁻ remains
+    fBall(ctx,ax,HA_Y,16,'#b91c1c','A⁻','rgba(185,28,28,.55)',8);
+    // Smaller heat ripples (vs HCl side — dimmer, smaller radius)
+    const hi=easeOut(Math.min(1,pr*3))*0.65;  // 0.65 = less intense than HCl
+    fHeatRipples(ctx,hx,HA_Y,hi,'#f97316',t);
+    fHeatRays(ctx,hx,HA_Y,hi*0.8,'#fb923c');
+    // Bond meter still showing heat absorbed
+    const mw=140;
+    fBondMeter(ctx,cx-mw/2,cy-52,mw,1,'heat absorbed (energy used)');
+    const ba=easeOut(Math.min(1,pr*3));
+    fHeatBadge(ctx,hx,H-30,ba,'▲ Less temperature rise — heat absorbed subtracted','#fb923c');
+    fLabel(ctx,W,'Less heat reaches surroundings — heat absorbed','rgba(168,85,247,.6)');
+  }
+}
+
+// ── Phase label text ──────────────────────────────────────
+const L_PHASES=[
+  {max:500, num:'①', text:'OH⁻ moves toward the <strong style="color:#fbbf24">free H⁺</strong> — it is already separate, no bond to break'},
+  {max:750, num:'②', text:'<strong style="color:#38bdf8">H⁺ + OH⁻ → H₂O</strong> — direct collision, reaction occurs immediately'},
+  {max:1000,num:'③', text:'Heat released directly to surroundings — <strong style="color:#f97316">full temperature rise</strong>, nothing taken away'},
+];
+const R_PHASES=[
+  {max:350, num:'①', text:'OH⁻ approaches the <strong style="color:#fbbf24">CH₃COOH molecule</strong> — H is locked inside by a bond'},
+  {max:600, num:'②', text:'<span style="color:#a855f7;font-weight:600">Breaking the O–H bond</span> — this step <strong>absorbs energy</strong> (bond cost). No heat yet.'},
+  {max:800, num:'③', text:'H⁺ is now free, A⁻ separates — <strong style="color:#22c55e">OH⁻ moves toward the released H⁺</strong>'},
+  {max:1000,num:'④', text:'H⁺ + OH⁻ → H₂O — heat released, but <strong style="color:#f97316">reduced by the bond-breaking cost</strong>'},
+];
+
+function updatePhaseLabels(p){
+  const lph=L_PHASES.find(ph=>p<=ph.max)||L_PHASES[L_PHASES.length-1];
+  document.getElementById('lblLText').innerHTML=lph.text;
+
+  const rph=R_PHASES.find(ph=>p<=ph.max)||R_PHASES[R_PHASES.length-1];
+  document.getElementById('lblRNum').textContent=rph.num;
+  document.getElementById('lblRText').innerHTML=rph.text;
+}
+
+// ── Playback loop ─────────────────────────────────────────
+let lastT=0;
+function focusLoop(ts){
+  if(!focusPlaying){focusRAF=null;return}
+  const dt=lastT?Math.min(ts-lastT,50):16;
+  lastT=ts;
+  focusProgress=Math.min(1000,focusProgress+dt*0.8); // ~800ms for full run at 60fps → ~10s total
+  setScrubber(focusProgress);
+  if(focusProgress>=1000){
+    focusPlaying=false;
+    document.getElementById('playBtn').textContent='↺';
+    focusRAF=null;
+    renderFocusFrame();return;
+  }
+  renderFocusFrame();
+  focusRAF=requestAnimationFrame(focusLoop);
+}
+
+function renderFocusFrame(){
+  drawFocusLeft(focusProgress);
+  drawFocusRight(focusProgress);
+  updatePhaseLabels(focusProgress);
+  // also keep ripples animating when paused
+  if(!focusPlaying){
+    // re-render once per animation frame when product shown, for ripple animation
+    if(focusProgress>750||focusProgress>800){
+      requestAnimationFrame(()=>{if(!focusPlaying)renderFocusFrame()});
+    }
+  }
+}
+
+// Continuous re-render for ripple animation even when paused at product stages
+let rippleRAF=null;
+function startRippleLoop(){
+  if(rippleRAF)cancelAnimationFrame(rippleRAF);
+  function rl(){
+    rippleRAF=requestAnimationFrame(rl);
+    if(focusPlaying)return; // playing handles its own loop
+    if(focusProgress>720||focusProgress>790){
+      drawFocusLeft(focusProgress);
+      drawFocusRight(focusProgress);
+    }
+  }
+  rl();
+}
+
+function togglePlay(){
+  const btn=document.getElementById('playBtn');
+  if(focusProgress>=1000){focusProgress=0;setScrubber(0)}
+  if(focusPlaying){
+    focusPlaying=false;btn.textContent='▶';
+    if(focusRAF){cancelAnimationFrame(focusRAF);focusRAF=null}
+    renderFocusFrame();
+  }else{
+    focusPlaying=true;btn.textContent='⏸';lastT=0;
+    focusRAF=requestAnimationFrame(focusLoop);
+  }
+}
+
+function onScrub(val){
+  focusProgress=parseInt(val);
+  if(focusPlaying){focusPlaying=false;document.getElementById('playBtn').textContent='▶'}
+  setScrubber(focusProgress);
+  renderFocusFrame();
+}
+
+function setScrubber(v){
+  const s=document.getElementById('focusScrubber');
+  s.value=v;
+  s.style.setProperty('--sp',(v/10)+'%');
+  document.getElementById('focusTime').textContent=Math.round(v/10)+'%';
+}
+
+function resetFocus(){
+  focusPlaying=false;document.getElementById('playBtn').textContent='▶';
+  focusProgress=0;setScrubber(0);
+  renderFocusFrame();
+}
+
+// ════════════════════════════════════════════════════════════
+// MAIN CONTROLLER
+// ════════════════════════════════════════════════════════════
+let sL,sR;
+
+let scene2Paused=false;
+let scene2Speed=0; // 0=x1, 1=x3, 2=x10
+
+function syncScene2Controls(){
+  const pauseBtn=document.getElementById('pauseSceneBtn');
+  const btn1=document.getElementById('speedBtn1');
+  const btn3=document.getElementById('speedBtn3');
+  const btn10=document.getElementById('speedBtn10');
+  const on=(cur===1);
+  pauseBtn.style.display=on?'block':'none';
+  btn1.style.display=on?'block':'none';
+  btn3.style.display=on?'block':'none';
+  btn10.style.display=on?'block':'none';
+  pauseBtn.textContent=scene2Paused?'Resume':'Pause';
+  // Highlight active speed button
+  [btn1,btn3,btn10].forEach((btn,i)=>{
+    if(scene2Speed===i) btn.classList.add('primary');
+    else btn.classList.remove('primary');
+  });
+}
+
+function toggleScene2Pause(){
+  scene2Paused=!scene2Paused;
+  if(scene2Paused&&focusPlaying){
+    focusPlaying=false;
+    document.getElementById('playBtn').textContent='▶';
+  }
+  syncScene2Controls();
+}
+
+function setScene2Speed(spd){
+  scene2Speed=spd; // 0=x1, 1=x3, 2=x10
+  syncScene2Controls();
+}
+
+function goStep(i){
+  cur=i;const s=STEPS[i];
+  document.getElementById('ns').textContent=s.scene;
+  document.getElementById('nt').innerHTML=s.text;
+  const nc=document.getElementById('nc');
+  nc.className='narr-card '+s.theme+' anim';
+  setTimeout(()=>nc.classList.remove('anim'),500);
+  sL.setMode(s.mode);sR.setMode(s.mode);
+  animBar('hL','hnL',s.hL);animBar('hR','hnR',s.hR);animBar('bF','bN',s.bR);
+  animTemp('tL',s.tL);animTemp('tR',s.tR);
+  document.getElementById('brow').classList.toggle('vis',s.bond);
+  document.getElementById('mfSec').style.display=s.misc?'block':'none';
+
+  const focSec=document.getElementById('focusSection');
+  if(s.focus){
+    focSec.style.display='block';
+    setTimeout(()=>{
+      fWL=fCanL.parentElement.getBoundingClientRect().width;fHL=fCanL.parentElement.getBoundingClientRect().height||190;
+      fWR=fCanR.parentElement.getBoundingClientRect().width;fHR=fCanR.parentElement.getBoundingClientRect().height||190;
+      resizeFocusCanvas(fCanL,fCtxL);resizeFocusCanvas(fCanR,fCtxR);
+      resetFocus();
+    },50);
+  }else{
+    focSec.style.display='none';
+    if(focusPlaying){focusPlaying=false;document.getElementById('playBtn').textContent='▶'}
+  }
+
+  document.querySelectorAll('.sdot').forEach((d,j)=>{
+    d.className='sdot'+(j<i?' done':j===i?' active':'');
+  });
+  ['l01','l12','l23'].forEach((id,j)=>{
+    document.getElementById(id).className='sline'+(j<i?' done':'');
+  });
+  document.getElementById('btnPrev').style.display=i>0?'block':'none';
+  const nb=document.getElementById('btnNext');
+  if(i>=STEPS.length-1){nb.textContent='↺ Restart';nb.onclick=()=>{cur=0;goStep(0)}}
+  else{nb.textContent='Next →';nb.onclick=nextStep}
+
+  if(i!==1){scene2Paused=false;scene2Speed=0;}
+  syncScene2Controls();
+}
+
+function nextStep(){if(cur<STEPS.length-1){cur++;goStep(cur)}}
+function prevStep(){if(cur>0){cur--;goStep(cur)}}
+
+function animBar(fillId,numId,target){
+  const fill=document.getElementById(fillId),num=document.getElementById(numId);
+  if(!fill)return;let v=0;const step=target/28;
+  const t=setInterval(()=>{v=Math.min(v+step,target);fill.style.width=v+'%';
+    if(num)num.textContent=Math.round(v)+'%';if(v>=target)clearInterval(t)},16);
+}
+function animTemp(id,target){
+  const el=document.getElementById(id);if(!el)return;
+  let v=0;const step=target/25;
+  const t=setInterval(()=>{v=Math.min(v+step,target);el.textContent=v.toFixed(1);
+    if(v>=target)clearInterval(t)},18);
+}
+
+window.addEventListener('load',()=>{
+  sL=new Sim('cL',true);sR=new Sim('cR',false);
+  initFocusCanvases();
+  startRippleLoop();
+  renderFocusFrame();
+  goStep(0);
+
+  document.getElementById('pauseSceneBtn').addEventListener('click',toggleScene2Pause);
+  document.getElementById('speedBtn1').addEventListener('click',()=>setScene2Speed(0));
+  document.getElementById('speedBtn3').addEventListener('click',()=>setScene2Speed(1));
+  document.getElementById('speedBtn10').addEventListener('click',()=>setScene2Speed(2));
+
+  const overlay=document.getElementById('focusOverlay');
+  const openBtn=document.getElementById('focusOpenBtn');
+  const closeBtn=document.getElementById('focusCloseBtn');
+
+  function openFocusModal(){
+    document.body.classList.add('focusModalOpen');
+    overlay.hidden=false;
+    closeBtn.hidden=false;
+    resizeFocusIfVisible();
+  }
+
+  function closeFocusModal(){
+    document.body.classList.remove('focusModalOpen');
+    overlay.hidden=true;
+    closeBtn.hidden=true;
+    resizeFocusIfVisible();
+  }
+
+  function resizeFocusIfVisible(){
+    const focSec=document.getElementById('focusSection');
+    if(focSec.style.display!=='none'){
+      fWL=fCanL.parentElement.getBoundingClientRect().width;fHL=fCanL.parentElement.getBoundingClientRect().height||190;
+      fWR=fCanR.parentElement.getBoundingClientRect().width;fHR=fCanR.parentElement.getBoundingClientRect().height||190;
+      resizeFocusCanvas(fCanL,fCtxL);resizeFocusCanvas(fCanR,fCtxR);
+    }
+  }
+
+  openBtn.addEventListener('click',openFocusModal);
+  closeBtn.addEventListener('click',closeFocusModal);
+  overlay.addEventListener('click',closeFocusModal);
+  window.addEventListener('keydown',(e)=>{if(e.key==='Escape') closeFocusModal();});
+});
+window.addEventListener('resize',()=>{
+  sL.resize();sR.resize();
+  if(document.getElementById('focusSection').style.display!=='none'){
+    fWL=fCanL.parentElement.getBoundingClientRect().width;fHL=fCanL.parentElement.getBoundingClientRect().height||190;
+    fWR=fCanR.parentElement.getBoundingClientRect().width;fHR=fCanR.parentElement.getBoundingClientRect().height||190;
+    resizeFocusCanvas(fCanL,fCtxL);resizeFocusCanvas(fCanR,fCtxR);
+  }
+});
+</script>
+</body>
+</html>

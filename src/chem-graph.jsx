@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+const { useState, useRef, useCallback, useMemo } = React;
 
 // ═══════════════════════════════════════════════════════════════════
 //  CHEMICAL TEXT PARSER
@@ -316,7 +316,7 @@ function NumInput({ label, value, onChange, step, min }) {
 // ═══════════════════════════════════════════════════════════════════
 //  MAIN
 // ═══════════════════════════════════════════════════════════════════
-export default function ChemGraph() {
+function ChemGraph() {
   const SW = 750, SH = 540;
   const PAD = { t: 32, r: 60, b: 72, l: 94 };
   const PW = SW - PAD.l - PAD.r;

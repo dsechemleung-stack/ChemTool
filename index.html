@@ -3,35 +3,132 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>chemtool.chemleung.com</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <title>ChemLeung</title>
+    <link rel="icon" href="./assets/icons/Chemistree%20icon_square.png" />
+    <link rel="apple-touch-icon" href="./assets/icons/Chemistree%20icon_square.png" />
+    <link rel="stylesheet" href="./src/styles.css" />
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" defer></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" defer></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" defer></script>
     <script src="https://unpkg.com/@ruffle-rs/ruffle" defer></script>
-    <script src="./app.js" defer></script>
+    <script src="./src/chem-graph.jsx" type="text/babel" defer></script>
+    <script src="./src/app.js" defer></script>
   </head>
   <body>
     <header class="topbar">
       <div class="topbar__inner">
         <div class="brand">
-          <div class="brand__title">ChemTool</div>
-          <div class="brand__subtitle">chemtool.chemleung.com</div>
+          <img class="brand__logo" src="./assets/icons/Chemistree%20icon_square.png" alt="Chemistree" />
+          <div>
+            <div class="brand__title">ChemLeung</div>
+            <div class="brand__subtitle">ChemLeung</div>
+          </div>
         </div>
-        <nav class="nav" aria-label="Primary">
-          <button class="nav__btn" data-tab="animation" aria-controls="tab-animation" aria-selected="true">Animation</button>
-          <button class="nav__btn" data-tab="graph" aria-controls="tab-graph" aria-selected="false">Graph</button>
-        </nav>
+        <div class="topActions" aria-label="Navigation shortcuts">
+          <button id="backBtn" class="navIconBtn" type="button" aria-label="Back">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M10 6 4 12l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M4 12h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button id="homeBtn" class="navIconBtn" type="button" aria-label="Home">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M3 10.5 12 3l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M5 10v10a1 1 0 0 0 1 1h4v-7h4v7h4a1 1 0 0 0 1-1V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
 
     <main class="container">
-      <section id="tab-animation" class="tab tab--active" data-tab-panel="animation">
+      <section id="tab-home" class="tab tab--active" data-tab-panel="home">
         <div class="panel">
           <div class="panel__header">
-            <h1 class="panel__title">Animation Widget</h1>
-            <div class="panel__subtitle">Play SWF animations (via Ruffle) and videos.</div>
+            <h1 class="panel__title">Widgets</h1>
           </div>
 
+          <div class="widgetGrid">
+            <div class="widgetCard widgetCard--animation widgetCard--clickable" role="button" tabindex="0" data-nav="tab:animation">
+              <div class="widgetCard__head">
+                <div class="widgetCard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path d="M4 6h16v12H4z" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="m10 9 6 3-6 3z" fill="currentColor" />
+                  </svg>
+                </div>
+                <div class="widgetCard__title">Animation</div>
+              </div>
+            </div>
+
+            <div class="widgetCard widgetCard--graph widgetCard--clickable" role="button" tabindex="0" data-nav="tab:graph">
+              <div class="widgetCard__head">
+                <div class="widgetCard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path d="M4 19V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M6 16l4-5 4 3 4-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div class="widgetCard__title">Graph</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-animation" class="tab" data-tab-panel="animation">
+        <div class="panel">
+          <div class="panel__header">
+            <h1 class="panel__title">Animation</h1>
+          </div>
+
+          <div class="widgetGrid">
+            <div class="widgetCard widgetCard--animation widgetCard--clickable" role="button" tabindex="0" data-nav="tab:player">
+              <div class="widgetCard__head">
+                <div class="widgetCard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path d="M4 6h16v12H4z" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="m10 9 6 3-6 3z" fill="currentColor" />
+                  </svg>
+                </div>
+                <div class="widgetCard__title">Player</div>
+              </div>
+            </div>
+
+            <a class="widgetCard widgetCard--graph widgetCard--clickable" href="./pages/chemical-bonding.html" target="_self" rel="noopener noreferrer">
+              <div class="widgetCard__head">
+                <div class="widgetCard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path d="M7.5 7.5a3.5 3.5 0 1 0 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M16.5 16.5a3.5 3.5 0 1 0 0-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M9.8 10.2 14.2 13.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="widgetCard__title">Chemical Bonding</div>
+              </div>
+            </a>
+
+            <a class="widgetCard widgetCard--animation widgetCard--clickable" href="./pages/neutralization-exothermic.html" target="_self" rel="noopener noreferrer">
+              <div class="widgetCard__head">
+                <div class="widgetCard__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M7 10h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M5 21h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M8 21a4 4 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="widgetCard__title">Neutralization: Exothermic Nature</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-player" class="tab" data-tab-panel="player">
+        <div class="panel">
           <div class="grid">
             <div class="card">
               <div class="card__header">
@@ -43,7 +140,11 @@
                 <label class="field__label" for="animationSelect">Animation / Video</label>
                 <select id="animationSelect" class="field__control">
                   <optgroup label="Animations (SWF)">
-                    <option value="swf:./%5BAnimation%5D%20Covalent_bonding.swf">[Animation] Covalent_bonding.swf</option>
+                    <option value="swf:./assets/swf/%5BAnimation%5D%20Covalent_bonding.swf">[Animation] Covalent_bonding.swf</option>
+                    <option value="swf:./assets/swf/%5BAnimation%5D%20Ionic%20bonding.swf">[Animation] Ionic_bonding.swf</option>
+                    <option value="swf:./assets/swf/%5BAnimation%5D%20Metallic%20bonding.swf">[Animation] Metallic_bonding.swf</option>
+                    <option value="swf:./assets/swf/%5BAnimation%5D%20Precipitation.swf">[Animation] Precipitation.swf</option>
+                    <option value="swf:./assets/swf/%5BInteractive%5D%20MolecuPuzzle.swf">[Interactive] MolecuPuzzle.swf</option>
                   </optgroup>
                   <optgroup label="Videos">
                     <option value="video:./sample.mp4" disabled>sample.mp4 (add your own file)</option>
@@ -86,52 +187,12 @@
       <section id="tab-graph" class="tab" data-tab-panel="graph">
         <div class="panel">
           <div class="panel__header">
-            <h1 class="panel__title">Graph Generation Widget</h1>
-            <div class="panel__subtitle">Generate datasets and render them as an interactive chart.</div>
+            <h1 class="panel__title">Graph</h1>
+            <div class="panel__subtitle">Interactive reaction graph tool.</div>
           </div>
 
-          <div class="grid">
-            <div class="card">
-              <div class="card__header">
-                <h2 class="card__title">Controls</h2>
-                <p class="card__hint">Pick a function and generate points.</p>
-              </div>
-
-              <div class="field">
-                <label class="field__label" for="datasetType">Dataset type</label>
-                <select id="datasetType" class="field__control">
-                  <option value="random">Random</option>
-                  <option value="sine">Sine</option>
-                  <option value="linear">Linear</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label class="field__label" for="pointCount">Points</label>
-                <input id="pointCount" class="field__control" type="number" min="5" max="500" step="1" value="50" />
-              </div>
-
-              <div class="field">
-                <label class="field__label" for="seed">Seed (optional, for Random)</label>
-                <input id="seed" class="field__control" type="text" placeholder="e.g. chem" />
-              </div>
-
-              <div class="actions">
-                <button id="generateGraphBtn" class="btn btn--primary" type="button">Generate</button>
-                <button id="resetGraphBtn" class="btn" type="button">Reset</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card__header">
-                <h2 class="card__title">Chart</h2>
-                <p class="card__hint">Pan/zoom is not enabled; hover to inspect values.</p>
-              </div>
-              <div class="chartWrap">
-                <canvas id="chartCanvas" height="260"></canvas>
-              </div>
-              <div class="meta" id="chartMeta" aria-live="polite"></div>
-            </div>
+          <div style="padding: 14px;">
+            <div id="chemGraphRoot"></div>
           </div>
         </div>
       </section>
@@ -139,7 +200,7 @@
 
     <footer class="footer">
       <div class="footer__inner">
-        <div>Place additional SWF/video files alongside this page, then update the Library list in <span class="kbd">index.html</span>.</div>
+        <div></div>
       </div>
     </footer>
   </body>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChemLeung — Chemical Bonding</title>
+<link rel="icon" href="../assets/icons/Chemistree%20icon_square.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#080c18;--surface:#0f1424;--surface2:#161c30;--border:rgba(255,255,255,0.07);
+  --text:#dde3f0;--dim:#6b7899;
+  --ionic:#00d8ff;--cov:#f5a623;--met:#a78bfa;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px;}
+h1{font-family:'Space Mono',monospace;font-size:1.1rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text);margin-bottom:4px;text-align:center;}
+.tagline{color:var(--dim);font-size:.82rem;text-align:center;margin-bottom:20px;}
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--surface);padding:5px;border-radius:12px;border:1px solid var(--border);}
+.tab{padding:9px 22px;border:none;border-radius:9px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;background:transparent;color:var(--dim);transition:all .25s;white-space:nowrap;}
+.chemFormula{ text-transform:none; letter-spacing:0; }
+.chemFormula sub{ font-size:0.72em; vertical-align:baseline; position:relative; bottom:-0.22em; }
+.tab:hover{color:var(--text);}
+.tab.ionic-active{background:var(--ionic);color:#000;}
+.tab.cov-active{background:var(--cov);color:#000;}
+.tab.met-active{background:var(--met);color:#000;}
+.layout{display:flex;gap:14px;width:100%;max-width:980px;}
+.canvas-wrap{flex:1;display:flex;flex-direction:column;background:var(--surface);border-radius:16px;border:1px solid var(--border);overflow:hidden;min-width:0;}
+canvas{display:block;width:100%;aspect-ratio:600/340;}
+.step-bar{padding:14px 18px;border-top:1px solid var(--border);background:var(--surface2);}
+.step-title{font-family:'Space Mono',monospace;font-size:.82rem;margin-bottom:5px;}
+.step-desc{color:var(--dim);font-size:.8rem;line-height:1.55;}
+.controls{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);}
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.08em;transition:all .2s;background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn:hover:not(:disabled){filter:brightness(1.4);}
+.btn:disabled{opacity:.25;cursor:not-allowed;}
+.btn-accent{color:#000!important;border:none!important;}
+.dots{display:flex;gap:7px;align-items:center;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);transition:all .3s;cursor:pointer;}
+.panel{width:180px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;}
+.config-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:14px;}
+.config-label{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.config-toggle{appearance:none;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);padding:4px 8px;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.08em;}
+.config-toggle:hover{filter:brightness(1.2);}
+.config-card.is-collapsed #configEl{display:none;}
+.config-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.config-row:last-child{margin-bottom:0;}
+.config-sym{font-family:'Space Mono',monospace;font-weight:700;font-size:.88rem;width:40px;flex-shrink:0;}
+.shells{display:flex;gap:3px;align-items:center;}
+.shell-n{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;background:rgba(255,255,255,0.06);color:var(--dim);}
+.shell-n.outer{background:rgba(255,255,255,0.12);color:var(--text);}
+.shell-n.highlighted{background:rgba(255,100,60,0.25);color:#ff8866;}
+.shell-n.complete{background:rgba(0,230,120,0.2);color:#00e878;}
+.shell-sep{color:var(--dim);font-size:.7rem;margin:0 1px;}
+.charge-badge{font-size:.72rem;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:600;font-family:'Space Mono',monospace;}
+@media(max-width:700px){.layout{flex-direction:column;}.panel{width:100%;}}
+</style>
+</head>
+<body>
+<h1>Chemical Bonding</h1>
+<p class="tagline">Interactive atomic models — understand the why behind electron behaviour</p>
+<div class="tabs">
+  <button class="tab" id="tab-ionic" onclick="switchBond('ionic')">&#9889; Ionic &middot; <span class="chemFormula">NaCl</span></button>
+  <button class="tab" id="tab-cov" onclick="switchBond('cov')">&#128279; Covalent &middot; <span class="chemFormula">Cl<sub>2</sub></span></button>
+  <button class="tab" id="tab-met" onclick="switchBond('met')">&#10022; Metallic &middot; <span class="chemFormula">Mg</span></button>
+</div>
+<div class="layout">
+  <div class="canvas-wrap">
+    <canvas id="c" width="600" height="340"></canvas>
+    <div class="step-bar">
+      <div class="step-title" id="sTitle"></div>
+      <div class="step-desc" id="sDesc"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="prevStep()">&#8592; Prev</button>
+      <div class="dots" id="dotsEl"></div>
+      <button class="btn btn-accent" id="nextBtn" onclick="nextStep()">Next &#8594;</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="config-card">
+      <div class="config-label">
+        <span>Electron Configuration</span>
+        <button class="config-toggle" id="configToggle" type="button" aria-controls="configEl" aria-expanded="true">Hide</button>
+      </div>
+      <div id="configEl"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const DATA={
+  ionic:{accent:'#00d8ff',steps:[
+    {title:'Two Atoms, Incomplete Outer Shells',
+     desc:'Sodium (Na) and Chlorine (Cl) before any interaction. Neither has a full outer shell.',
+     why:'Sodium carries 11 electrons: 2 \u00b7 8 \u00b7 1. Its lone outer electron occupies the third shell by itself. Chlorine carries 17 electrons: 2 \u00b7 8 \u00b7 7 \u2014 just one short of a full third shell. Incompleteness in the outer shell is the source of chemical reactivity.',
+     config:[{sym:'Na',shells:[2,8,1],mode:'normal'},{sym:'Cl',shells:[2,8,7],mode:'normal'}]},
+    {title:'The Drive for Stability',
+     desc:"Na\u2019s lone outer electron is loosely held. Cl has exactly one vacancy in its outer shell.",
+     why:"Na\u2019s outer electron sits alone in the 3rd shell, shielded from the nucleus by 10 inner electrons \u2014 the nucleus can barely hold it. Losing it leaves Na with a full 2nd shell of 8, matching Neon. Cl strongly attracts one more electron: gaining it completes its 3rd shell to 8, matching Argon. The two atoms fit each other\u2019s needs exactly.",
+     config:[{sym:'Na',shells:[2,8,1],mode:'highlight-outer'},{sym:'Cl',shells:[2,8,7],mode:'highlight-gap'}]},
+    {title:'Electron Transfer',
+     desc:"Na\u2019s outer electron transfers to fill the vacancy in Cl\u2019s outer shell.",
+     why:"Removing Na\u2019s loosely held outer electron costs little energy. Cl has very high electron affinity \u2014 it releases substantial energy on gaining one. The net energy change is negative: the system reaches a lower, more stable state. Nature always trends toward lower energy. The transfer happens.",
+     config:[{sym:'Na\u207a',shells:[2,8],mode:'complete'},{sym:'Cl\u207b',shells:[2,8,8],mode:'complete'}]},
+    {title:'Ionic Bond Formed',
+     desc:'Na\u207a and Cl\u207b attract each other electrostatically. This attraction IS the ionic bond.',
+     why:"Na lost an electron \u2192 charge +1 (Na\u207a). Cl gained one \u2192 charge \u22121 (Cl\u207b). Opposite charges attract via Coulomb\u2019s law \u2014 no electrons are shared or overlapping. The bond is purely electrostatic. In a crystal, each Na\u207a is surrounded by six Cl\u207b and vice versa, multiplying this attraction across the whole lattice.",
+     config:[{sym:'Na\u207a',shells:[2,8],charge:'+1',mode:'complete'},{sym:'Cl\u207b',shells:[2,8,8],charge:'\u22121',mode:'complete'}]}
+  ]},
+  cov:{accent:'#f5a623',steps:[
+    {title:'Two Identical Cl Atoms',
+     desc:'Both chlorine atoms have 7 outer electrons. Each needs exactly one more.',
+     why:'Each Cl atom is arranged 2 \u00b7 8 \u00b7 7. Both need exactly one more electron to reach a stable octet of 8, matching Argon. The need is identical and perfectly symmetric on both sides.',
+     config:[{sym:'Cl',shells:[2,8,7],mode:'normal'},{sym:'Cl',shells:[2,8,7],mode:'normal'}]},
+    {title:'Why Not Just Take?',
+     desc:"Neither atom can steal the other\u2019s electron \u2014 they pull with exactly equal force.",
+     why:"For ionic bonding, one atom must pull electrons far more strongly. But these atoms are identical: same nuclear charge, same shielding, same electronegativity. Any pull by one is matched exactly by the other. Creating Cl\u207a and Cl\u207b would only make Cl\u207a yank the electron straight back. Outright theft is impossible \u2014 a permanent stalemate.",
+     config:[{sym:'Cl',shells:[2,8,7],mode:'highlight-outer'},{sym:'Cl',shells:[2,8,7],mode:'highlight-outer'}]},
+    {title:'Sharing as the Only Solution',
+     desc:'Each atom contributes one electron to a shared pair held between them.',
+     why:"The compromise: each Cl contributes 1 electron to a shared pair. Those 2 electrons sit between the nuclei, attracted to both simultaneously. From each atom\u2019s perspective it counts its 6 remaining electrons plus both shared ones \u2014 giving an effective octet. Both complete their shells without either losing an electron outright.",
+     config:[{sym:'Cl',shells:[2,8,6],shared:1,mode:'normal'},{sym:'Cl',shells:[2,8,6],shared:1,mode:'normal'}]},
+    {title:'Covalent Bond Formed',
+     desc:'The shared pair is pulled by both nuclei \u2014 that mutual attraction holds the molecule together.',
+     why:"The two shared electrons are simultaneously attracted to both positive nuclei. This mutual attraction is the covalent bond \u2014 not a static bridge but a region of electron density where both nuclei find it energetically favorable to stay close. Each Cl counts 8 electrons: 6 lone + 2 shared. Both achieve their octet with zero net charge.",
+     config:[{sym:'Cl',shells:[2,8,6],shared:1,mode:'complete'},{sym:'Cl',shells:[2,8,6],shared:1,mode:'complete'}]}
+  ]},
+  met:{accent:'#a78bfa',steps:[
+    {title:'Mg Atoms Packed in a Solid',
+     desc:'Many magnesium atoms close together, each carrying 2 outer electrons.',
+     why:'Magnesium has 12 electrons: 2 \u00b7 8 \u00b7 2. The 2 outer electrons are in the 3rd shell, far from the nucleus. Inside, 10 electrons shield them from most of the nuclear pull \u2014 the effective attraction is far weaker than the +12 charge suggests.',
+     config:[{sym:'Mg',shells:[2,8,2],mode:'normal'},{sym:'Mg',shells:[2,8,2],mode:'normal'},{sym:'Mg',shells:[2,8,2],mode:'normal'}]},
+    {title:'Outer Electrons Are Weakly Held',
+     desc:'The 2 outer electrons are heavily shielded and barely bound to their own atom.',
+     why:"The 10 inner electrons create a shield that cancels most of the nucleus\u2019s pull on the outer 2. In a closely packed solid, neighbouring nuclei also attract these electrons. No single nucleus holds them tightly enough \u2014 they become almost free to wander between atoms.",
+     config:[{sym:'Mg',shells:[2,8,2],mode:'highlight-outer'},{sym:'Mg',shells:[2,8,2],mode:'highlight-outer'},{sym:'Mg',shells:[2,8,2],mode:'highlight-outer'}]},
+    {title:'Electrons Released into the Lattice',
+     desc:'The outer electrons detach and become delocalized across the whole metal.',
+     why:"When countless Mg atoms pack together, the weakly held outer electrons collectively detach. Delocalization lowers overall energy \u2014 the electrons can occupy lower-energy states spread across the entire metal rather than confined to one atom. Each Mg, having lost 2 electrons, becomes a Mg\u00b2\u207a ion.",
+     config:[{sym:'Mg\u00b2\u207a',shells:[2,8],charge:'\u00b2\u207a',mode:'complete'},{sym:'Mg\u00b2\u207a',shells:[2,8],charge:'\u00b2\u207a',mode:'complete'},{sym:'Mg\u00b2\u207a',shells:[2,8],charge:'\u00b2\u207a',mode:'complete'}]},
+    {title:'Metallic Bond \u2014 Sea of Electrons',
+     desc:'Mg\u00b2\u207a ions sit in a fixed lattice, surrounded by a sea of freely moving electrons.',
+     why:"The electrostatic attraction between the regular Mg\u00b2\u207a lattice and the surrounding electron cloud is the metallic bond. The electrons are delocalized across the whole metal \u2014 not shared between any two specific atoms. Their freedom to move also explains why metals conduct electricity: the electron sea flows in response to an applied voltage.",
+     config:[{sym:'Mg\u00b2\u207a',shells:[2,8],charge:'\u00b2\u207a',mode:'complete'},{sym:'Mg\u00b2\u207a',shells:[2,8],charge:'\u00b2\u207a',mode:'complete'},{sym:'Mg\u00b2\u207a',shells:[2,8],charge:'\u00b2\u207a',mode:'complete'}]}
+  ]}
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let bond='ionic',step=0,transitionT=1,transitionStart=0;
+const TRANS_DUR=1300;
+let freeElectrons=[];
+
+// ============================================================
+// CANVAS SETUP
+// ============================================================
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const W=600,H=340;
+const SR=[30,56,82];
+function sr(i){return SR[i]!==undefined?SR[i]:SR[SR.length-1]+(i-SR.length+1)*26;}
+
+function resizeCanvas(){
+  var r=canvas.getBoundingClientRect();
+  var dpr=window.devicePixelRatio||1;
+  var bw=Math.max(1,Math.round(r.width*dpr));
+  var bh=Math.max(1,Math.round(r.height*dpr));
+  if(canvas.width!==bw||canvas.height!==bh){
+    canvas.width=bw;
+    canvas.height=bh;
+  }
+  var scale=r.width/W;
+  ctx.setTransform(dpr*scale,0,0,dpr*scale,0,0);
+  ctx.imageSmoothingEnabled=true;
+}
+
+// FIX 1: PUSH increased 3→6 so electron dots sit clearly outside the shell ring lines
+const PUSH=6;
+
+// ============================================================
+// COLOR UTILITY
+// ============================================================
+function rgba(hex,a){
+  const h=hex.replace('#','').slice(0,6);
+  const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+
+// ============================================================
+// LEWIS DOT POSITIONS
+// 4 positions: top(0), right(1), bottom(2), left(3)
+// ============================================================
+const LDIR=[
+  {ax:0, ay:-1,px:1, py:0},   // 0 top
+  {ax:1, ay:0, px:0, py:1},   // 1 right
+  {ax:0, ay:1, px:1, py:0},   // 2 bottom
+  {ax:-1,ay:0, px:0, py:1},   // 3 left
+];
+
+function lewisPos(cx,cy,R,count,sc,singleDirOverride){
+  sc=sc||1;
+  const r=R*sc;
+  const OFF=5.5*sc;
+  const fills=[0,0,0,0];
+  // For 7-electron outer shell with override: place single electron at specified direction
+  if(count===7 && singleDirOverride!==undefined){
+    for(var ii=0;ii<4;ii++) fills[ii]=(ii===singleDirOverride)?1:2;
+  } else {
+    for(let i=0;i<Math.min(count,4);i++) fills[i]++;
+    for(let i=4;i<Math.min(count,8);i++) fills[i-4]++;
+  }
+  const pts=[];
+  LDIR.forEach(function(d,i){
+    const bx=cx+d.ax*(r+PUSH), by=cy+d.ay*(r+PUSH);
+    if(fills[i]===1) pts.push({x:bx,y:by});
+    if(fills[i]===2){
+      pts.push({x:bx-d.px*OFF, y:by-d.py*OFF});
+      pts.push({x:bx+d.px*OFF, y:by+d.py*OFF});
+    }
+  });
+  return pts;
+}
+
+function circlePos(cx,cy,R,count,sc){
+  sc=sc||1;
+  const r=R*sc;
+  var pts=[];
+  for(var i=0;i<count;i++){
+    var a=-Math.PI/2+(2*Math.PI*i/count);
+    pts.push({x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)});
+  }
+  return pts;
+}
+
+// ============================================================
+// FIX 3: Lone pair helper — draws 6 electrons on the 3 non-bonding sides
+// bondSideIdx: 1=right (for left atom), 3=left (for right atom)
+// ============================================================
+function drawLonePairs(cx,cy,bondSideIdx,sc,isComplete){
+  sc=sc||1;
+  var eColor=isComplete?'#44dd88':'#4488ff';
+  var eR=4.8;
+  var r=sr(2)*sc;
+  var OFF=5.5*sc;
+  var glow=!!isComplete;
+  for(var i=0;i<4;i++){
+    if(i===bondSideIdx) continue;
+    var d=LDIR[i];
+    var bx=cx+d.ax*(r+PUSH), by=cy+d.ay*(r+PUSH);
+    drawDot(bx-d.px*OFF, by-d.py*OFF, eColor, eR, glow);
+    drawDot(bx+d.px*OFF, by+d.py*OFF, eColor, eR, glow);
+  }
+}
+
+// ============================================================
+// DRAW PRIMITIVES
+// ============================================================
+function clear(){
+  ctx.fillStyle='#0a0f1e';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,255,0.022)';
+  for(var x=20;x<W;x+=30)for(var y=20;y<H;y+=30){
+    ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill();
+  }
+}
+
+function drawNucleus(cx,cy,sym,color,sc){
+  sc=sc||1;
+  var r=13*sc;
+  var g=ctx.createRadialGradient(cx,cy,0,cx,cy,r*2.2);
+  g.addColorStop(0,rgba(color,0.8));g.addColorStop(1,rgba(color,0));
+  ctx.beginPath();ctx.arc(cx,cy,r*2.2,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+  var label=sym.replace(/[\u207a\u207b\u00b2\u00b9\u2070-\u2079]/g,'');
+  ctx.fillStyle='#000';ctx.font='bold '+(sc>0.8?10:8)+'px Space Mono';
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,cx,cy);
+}
+
+function drawRing(cx,cy,shellIdx,color,sc){
+  sc=sc||1;
+  ctx.beginPath();ctx.arc(cx,cy,sr(shellIdx)*sc,0,Math.PI*2);
+  ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
+}
+
+function drawDot(x,y,color,radius,glowing){
+  if(glowing){
+    var g=ctx.createRadialGradient(x,y,0,x,y,radius*3);
+    g.addColorStop(0,rgba(color,0.82));g.addColorStop(1,rgba(color,0));
+    ctx.beginPath();ctx.arc(x,y,radius*3,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  }
+  ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+}
+
+// ============================================================
+// ATOM RENDERER
+// ============================================================
+function drawAtom(cx,cy,shells,opts){
+  opts=opts||{};
+  var color=opts.color||'#aaa',sym=opts.sym||'?',sc=opts.sc||1;
+  var mode=opts.mode||'normal',skipOuter=opts.skipOuterDots||false,alpha=opts.alpha||1;
+  ctx.save();ctx.globalAlpha=alpha;
+  var outerIdx=shells.length-1;
+
+  shells.forEach(function(cnt,i){
+    var isOuter=(i===outerIdx);
+    var ringC='rgba(255,255,255,0.10)';
+    if(isOuter&&(mode==='highlight-outer'||mode==='highlight-gap')) ringC=rgba(color,0.35);
+    drawRing(cx,cy,i,ringC,sc);
+    if(isOuter&&skipOuter) return;
+
+    var pts;
+    if(isOuter) pts=lewisPos(cx,cy,sr(i),cnt,sc,opts.singleDirOverride);
+    else pts=circlePos(cx,cy,sr(i),cnt,sc);
+
+    var eColor='#4488ff';
+    if(isOuter&&mode==='highlight-outer') eColor='#ff7744';
+    if(mode==='complete') eColor='#44dd88';
+    var eR=(sc>0.8?4.8:3.3);
+    var glow=(isOuter&&(mode==='highlight-outer'||mode==='complete'));
+    pts.forEach(function(p){drawDot(p.x,p.y,eColor,eR,glow);});
+
+    // Gap slot indicator for Cl highlight-gap (7-electron outer shell)
+    // FIX 1: uses updated PUSH constant
+    if(isOuter&&mode==='highlight-gap'&&cnt===7){
+      var d=LDIR[3]; // left — Na is to the left of Cl
+      var rr=sr(i)*sc;
+      var OFF=5.5*sc;
+      var bx=cx+d.ax*(rr+PUSH), by=cy+d.ay*(rr+PUSH);
+      var gx=bx+d.px*OFF, gy=by+d.py*OFF;
+      ctx.beginPath();ctx.arc(gx,gy,eR+1,0,Math.PI*2);
+      ctx.strokeStyle=rgba(color,0.8);ctx.lineWidth=1.5;
+      ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
+    }
+  });
+
+  drawNucleus(cx,cy,sym,color,sc);
+  ctx.restore();
+}
+
+function drawLabel(cx,y,sym,sub,color){
+  ctx.textAlign='center';
+  ctx.font='bold 11px Space Mono';ctx.fillStyle=color;ctx.fillText(sym,cx,y);
+  ctx.font='500 10px DM Sans';ctx.fillStyle='rgba(255,255,255,0.36)';ctx.fillText(sub,cx,y+15);
+}
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function easeIO(t){return t<.5?2*t*t:-1+(4-2*t)*t;}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+
+function arrow(x1,y1,x2,y2,col){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.stroke();
+  var a=Math.atan2(y2-y1,x2-x1);
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-10*Math.cos(a-.4),y2-10*Math.sin(a-.4));
+  ctx.lineTo(x2-10*Math.cos(a+.4),y2-10*Math.sin(a+.4));
+  ctx.closePath();ctx.fillStyle=col;ctx.fill();
+}
+
+// ============================================================
+// IONIC SCENES   (NaCl)
+// ============================================================
+var NA_C='#ffd35c', CL_C='#6ee7b7';
+var NAX=165, CLX=435, MY=H/2;
+
+// FIX 2: Na's lone outer electron is placed on the RIGHT side (facing Cl)
+// so the transfer animation starts from the correct, visible position.
+function naElecPos(){
+  var d=LDIR[1]; // right
+  return {x:NAX+d.ax*(sr(2)+PUSH), y:MY+d.ay*(sr(2)+PUSH)};
+  // = {x: NAX + 88, y: MY}
+}
+
+// Cl's vacancy: left side (facing Na), second dot in the paired slot
+function clGapPos(){
+  var d=LDIR[3]; // left: ax=-1, ay=0, px=0, py=1
+  var OFF=5.5;
+  var bx=CLX+d.ax*(sr(2)+PUSH), by=MY+d.ay*(sr(2)+PUSH);
+  return {x:bx+d.px*OFF, y:by+d.py*OFF};
+  // = {x: CLX-88, y: MY+5.5}
+}
+
+function drawIonic(s,t){
+  var acc='#00d8ff';
+  if(s===0){
+    drawAtom(NAX,MY,[2,8,1],{color:NA_C,sym:'Na'});
+    drawAtom(CLX,MY,[2,8,7],{color:CL_C,sym:'Cl'});
+    drawLabel(NAX,MY+100,'Na','2 \u00b7 8 \u00b7 1',acc);
+    drawLabel(CLX,MY+100,'Cl','2 \u00b7 8 \u00b7 7',acc);
+
+  } else if(s===1){
+    // FIX 2: draw Na's outer electron on the RIGHT side to match the transfer direction
+    drawAtom(NAX,MY,[2,8,1],{color:NA_C,sym:'Na',mode:'highlight-outer',skipOuterDots:true});
+    var ePos=naElecPos();
+    // glow
+    var gg=ctx.createRadialGradient(ePos.x,ePos.y,0,ePos.x,ePos.y,14.4);
+    gg.addColorStop(0,rgba('#ff7744',0.82));gg.addColorStop(1,rgba('#ff7744',0));
+    ctx.beginPath();ctx.arc(ePos.x,ePos.y,14.4,0,Math.PI*2);ctx.fillStyle=gg;ctx.fill();
+    ctx.beginPath();ctx.arc(ePos.x,ePos.y,4.8,0,Math.PI*2);ctx.fillStyle='#ff7744';ctx.fill();
+
+    drawAtom(CLX,MY,[2,8,7],{color:CL_C,sym:'Cl',mode:'highlight-gap'});
+
+    // Horizontal arrow between the two atoms at equator level
+    var gapL=NAX+sr(2)+PUSH+16, gapR=CLX-sr(2)-PUSH-16;
+    arrow(gapL,MY,gapR,MY,acc);
+    ctx.fillStyle=acc;ctx.font='500 10px DM Sans';ctx.textAlign='center';
+    ctx.fillText('electron tends to migrate \u2192',W/2,MY-sr(2)-28);
+    drawLabel(NAX,MY+100,'Na','2 \u00b7 8 \u00b7 1',acc);
+    drawLabel(CLX,MY+100,'Cl','2 \u00b7 8 \u00b7 7',acc);
+
+  } else if(s===2){
+    var et=easeIO(t);
+    // Na already lost outer electron — draw as Na+
+    drawAtom(NAX,MY,[2,8],{color:NA_C,sym:'Na',mode:'complete'});
+    drawAtom(CLX,MY,[2,8,7],{color:CL_C,sym:'Cl'});
+
+    // FIX 2: electron travels from Na's right edge to Cl's left vacancy
+    var src=naElecPos(), dst=clGapPos();
+    // Gentle upward arc — control point above the midpoint
+    var cpX=(src.x+dst.x)/2, cpY=(src.y+dst.y)/2-55;
+    var bx=(1-et)*(1-et)*src.x+2*(1-et)*et*cpX+et*et*dst.x;
+    var by=(1-et)*(1-et)*src.y+2*(1-et)*et*cpY+et*et*dst.y;
+    drawDot(bx,by,'#ff8844',6,true);
+    ctx.fillStyle='#ff8844';ctx.font='700 11px Space Mono';ctx.textAlign='center';
+    ctx.fillText('e\u207b',bx,by-14);
+    drawLabel(NAX,MY+100,'Na \u2192 Na\u207a','losing outer e\u207b',acc);
+    drawLabel(CLX,MY+100,'Cl \u2192 Cl\u207b','gaining e\u207b',acc);
+
+  } else if(s===3){
+    var et2=easeOut(t);
+    var sep=lerp(280,210,et2);
+    var nx=W/2-sep/2, cx2=W/2+sep/2;
+    drawAtom(nx,MY,[2,8],{color:NA_C,sym:'Na',mode:'complete'});
+    drawAtom(cx2,MY,[2,8,8],{color:CL_C,sym:'Cl',mode:'complete'});
+    ctx.font='bold 14px Space Mono';ctx.textAlign='center';
+    ctx.fillStyle='#ff8866';ctx.fillText('+',nx+sr(1)+20,MY-sr(1)-16);
+    ctx.fillStyle='#44ee99';ctx.fillText('\u2212',cx2+sr(2)+20,MY-sr(2)-16);
+    for(var k=-2;k<=2;k++){
+      ctx.beginPath();
+      ctx.moveTo(nx+sr(1)+5,MY+k*22);
+      ctx.bezierCurveTo(W/2-20,MY+k*28,W/2+20,MY+k*28,cx2-sr(2)-5,MY+k*22);
+      ctx.strokeStyle=rgba('#00d8ff',et2*0.28);ctx.lineWidth=1.2;ctx.stroke();
+    }
+    ctx.fillStyle=rgba(acc,0.8);ctx.font='600 11px DM Sans';ctx.textAlign='center';
+    ctx.fillText('\u2190 electrostatic attraction \u2192',W/2,MY-118*et2);
+    drawLabel(nx,MY+100,'Na\u207a','2 \u00b7 8',acc);
+    drawLabel(cx2,MY+100,'Cl\u207b','2 \u00b7 8 \u00b7 8  \u2713',acc);
+  }
+}
+
+// ============================================================
+// COVALENT SCENES   (Cl2)
+// ============================================================
+var CL_C2='#67d2e8';
+var COV_L=165, COV_R=435;
+// FIX 3: bonded positions keep the shared pair clearly between the atoms
+// Outer shell radius (sr(2)+PUSH) ≈ 88px. With ±94px centers, edge gap ≈ 12px.
+var COV_BL=W/2-94, COV_BR=W/2+94;
+
+function drawSharedPair(midX,alpha,acc){
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.beginPath();ctx.arc(midX,MY,18,0,Math.PI*2);
+  ctx.fillStyle=rgba(acc,0.14);ctx.fill();
+  ctx.beginPath();ctx.arc(midX,MY,18,0,Math.PI*2);
+  ctx.strokeStyle=rgba(acc,0.65);ctx.lineWidth=1.5;ctx.stroke();
+  // FIX 3: shared pair electrons clearly in the gap, not overlapping lone pairs
+  drawDot(midX-6,MY,'#ffd060',5,true);
+  drawDot(midX+6,MY,'#ffd060',5,true);
+  ctx.restore();
+}
+
+function drawCovalent(s,t){
+  var acc='#f5a623';
+  if(s===0){
+    drawAtom(COV_L,MY,[2,8,7],{color:CL_C2,sym:'Cl',singleDirOverride:1});
+    drawAtom(COV_R,MY,[2,8,7],{color:CL_C2,sym:'Cl'});
+    drawLabel(COV_L,MY+100,'Cl','2 \u00b7 8 \u00b7 7',acc);
+    drawLabel(COV_R,MY+100,'Cl','2 \u00b7 8 \u00b7 7',acc);
+
+  } else if(s===1){
+    drawAtom(COV_L,MY,[2,8,7],{color:CL_C2,sym:'Cl',mode:'highlight-outer',singleDirOverride:1});
+    drawAtom(COV_R,MY,[2,8,7],{color:CL_C2,sym:'Cl',mode:'highlight-outer'});
+    var osc=Math.sin(Date.now()/350)*0.5+0.5;
+    var arY=MY-sr(2)-22;
+    arrow(COV_L+sr(2)+PUSH+44,arY,COV_L+sr(2)+PUSH+12,arY,'#ff5555');
+    arrow(COV_R-sr(2)-PUSH-44,arY,COV_R-sr(2)-PUSH-12,arY,'#ff5555');
+    ctx.fillStyle='#ff5555';ctx.font='500 10px DM Sans';ctx.textAlign='center';
+    ctx.fillText('equal pull \u2014 neither wins',W/2,arY-12);
+    ctx.globalAlpha=0.55+osc*0.45;
+    ctx.fillStyle='#ff5555';ctx.font='700 13px Space Mono';ctx.textAlign='center';
+    ctx.fillText('STALEMATE',W/2,MY);
+    ctx.globalAlpha=1;
+
+  } else if(s===2){
+    var et=easeIO(t);
+    var lx=lerp(COV_L,COV_BL,et), rx=lerp(COV_R,COV_BR,et);
+    // FIX 3: skip default outer dots; draw lone pairs only on non-bonding sides
+    drawAtom(lx,MY,[2,8,6],{color:CL_C2,sym:'Cl',skipOuterDots:true});
+    drawAtom(rx,MY,[2,8,6],{color:CL_C2,sym:'Cl',skipOuterDots:true});
+    drawLonePairs(lx,MY,1,1,false); // skip right (bond side for left atom)
+    drawLonePairs(rx,MY,3,1,false); // skip left (bond side for right atom)
+    drawSharedPair((lx+rx)/2,et,acc);
+    ctx.fillStyle=rgba(acc,et);ctx.font='600 10px DM Sans';ctx.textAlign='center';
+    ctx.fillText('shared pair forming between atoms',W/2,MY-120);
+
+  } else if(s===3){
+    var lx2=COV_BL, rx2=COV_BR;
+    // FIX 3: lone pairs on 3 sides, shared pair in the gap
+    drawAtom(lx2,MY,[2,8,6],{color:CL_C2,sym:'Cl',mode:'complete',skipOuterDots:true});
+    drawAtom(rx2,MY,[2,8,6],{color:CL_C2,sym:'Cl',mode:'complete',skipOuterDots:true});
+    drawLonePairs(lx2,MY,1,1,true);
+    drawLonePairs(rx2,MY,3,1,true);
+
+    // Dashed electron-sphere overlays showing each atom counts 8
+    ctx.setLineDash([5,4]);
+    ctx.strokeStyle=rgba(CL_C2,0.30);ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(lx2,MY,sr(2)+16,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(rx2,MY,sr(2)+16,0,Math.PI*2);ctx.stroke();
+    ctx.setLineDash([]);
+
+    drawSharedPair(W/2,1,acc);
+
+    ctx.fillStyle=acc;ctx.font='600 11px DM Sans';ctx.textAlign='center';
+    ctx.fillText('Each Cl \u201ccounts\u201d 8 outer electrons \u2713',W/2,MY-128);
+    ctx.fillStyle=rgba(CL_C2,0.48);ctx.font='10px DM Sans';
+    ctx.fillText('(dotted = each atom\u2019s electron sphere)',W/2,MY-114);
+    drawLabel(lx2,MY+100,'Cl','6 lone + 2 shared = 8',acc);
+    drawLabel(rx2,MY+100,'Cl','6 lone + 2 shared = 8',acc);
+  }
+}
+
+// ============================================================
+// METALLIC SCENES   (Mg)
+// ============================================================
+var MG_C='#7eb8ff';
+var MG_SC=0.72;
+var MG_POS=[[145,105],[300,105],[455,105],[145,235],[300,235],[455,235]];
+var FREE_CLR='#ff7744';
+
+function initFree(){
+  freeElectrons=[];
+  // FIX 4: exactly 12 delocalized electrons = 2 per Mg × 6 atoms
+  for(var i=0;i<12;i++) freeElectrons.push({
+    x:90+Math.random()*420, y:52+Math.random()*236,
+    vx:(Math.random()-.5)*1.6, vy:(Math.random()-.5)*1.6
+  });
+}
+
+function initConfigToggle(){
+  var card=document.querySelector('.config-card');
+  var btn=document.getElementById('configToggle');
+  if(!card||!btn) return;
+
+  var KEY='chemleung:bonding:configCollapsed';
+  var collapsed=localStorage.getItem(KEY)==='1';
+
+  function apply(){
+    card.classList.toggle('is-collapsed',collapsed);
+    btn.setAttribute('aria-expanded',collapsed?'false':'true');
+    btn.textContent=collapsed?'Show':'Hide';
+  }
+
+  btn.addEventListener('click',function(){
+    collapsed=!collapsed;
+    localStorage.setItem(KEY,collapsed?'1':'0');
+    apply();
+  });
+
+  apply();
+}
+function stepFree(){
+  freeElectrons.forEach(function(e){
+    e.x+=e.vx; e.y+=e.vy;
+    if(e.x<82){e.x=82;e.vx*=-1;} if(e.x>518){e.x=518;e.vx*=-1;}
+    if(e.y<50){e.y=50;e.vy*=-1;} if(e.y>288){e.y=288;e.vy*=-1;}
+  });
+}
+
+function drawMetallic(s,t){
+  var acc='#a78bfa';
+  if(s===0){
+    MG_POS.forEach(function(p){drawAtom(p[0],p[1],[2,8,2],{color:MG_C,sym:'Mg',sc:MG_SC});});
+    drawLabel(W/2,H-14,'Magnesium solid','2 \u00b7 8 \u00b7 2 per atom',acc);
+  } else if(s===1){
+    var pulse=Math.sin(Date.now()/300)*.5+.5;
+    MG_POS.forEach(function(p){
+      drawAtom(p[0],p[1],[2,8,2],{color:MG_C,sym:'Mg',sc:MG_SC,mode:'highlight-outer'});
+      ctx.beginPath();ctx.arc(p[0],p[1],sr(2)*MG_SC+12,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,119,68,'+(pulse*0.45)+')';ctx.lineWidth=2;ctx.stroke();
+    });
+    drawLabel(W/2,H-14,'Outer electrons','weakly shielded \u2014 loosely bound',acc);
+  } else if(s===2){
+    var et=easeOut(t);
+    MG_POS.forEach(function(p){drawAtom(p[0],p[1],[2,8],{color:MG_C,sym:'Mg',sc:MG_SC,mode:'complete'});});
+    freeElectrons.forEach(function(e){
+      ctx.globalAlpha=et;
+      drawDot(e.x,e.y,FREE_CLR,4.5,true);
+      ctx.globalAlpha=1;
+    });
+    drawLabel(W/2,H-14,'Electrons delocalized','Mg \u2192 Mg\u00b2\u207a + 2e\u207b',acc);
+  } else if(s===3){
+    stepFree();
+    ctx.fillStyle=rgba(FREE_CLR,0.05);ctx.fillRect(72,44,456,248);
+    ctx.strokeStyle=rgba(FREE_CLR,0.18);ctx.lineWidth=1;ctx.strokeRect(72,44,456,248);
+    ctx.fillStyle=rgba(FREE_CLR,0.35);ctx.font='9px DM Sans';ctx.textAlign='center';
+    // FIX 4: label confirms exactly 12 electrons
+    ctx.fillText('SEA OF DELOCALIZED ELECTRONS  (12 e\u207b \u2014 2 per Mg \u00d7 6 atoms)',W/2,H-12);
+    MG_POS.forEach(function(p){
+      drawAtom(p[0],p[1],[2,8],{color:MG_C,sym:'Mg',sc:MG_SC,mode:'complete'});
+      ctx.fillStyle=rgba(acc,0.9);ctx.font='bold 10px Space Mono';ctx.textAlign='center';
+      ctx.fillText('2+',p[0]+sr(1)*MG_SC+14,p[1]-sr(1)*MG_SC-2);
+    });
+    freeElectrons.forEach(function(e){
+      var g=ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,12);
+      g.addColorStop(0,rgba(FREE_CLR,0.8));g.addColorStop(1,rgba(FREE_CLR,0));
+      ctx.beginPath();ctx.arc(e.x,e.y,12,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+      ctx.beginPath();ctx.arc(e.x,e.y,4.2,0,Math.PI*2);ctx.fillStyle='#ffcc99';ctx.fill();
+    });
+  }
+}
+
+// ============================================================
+// MAIN LOOP
+// ============================================================
+function loop(ts){
+  if(transitionT<1) transitionT=Math.min(1,(ts-transitionStart)/TRANS_DUR);
+  clear();
+  var t=transitionT;
+  if(bond==='ionic') drawIonic(step,t);
+  else if(bond==='cov') drawCovalent(step,t);
+  else drawMetallic(step,t);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+
+// ============================================================
+// UI
+// ============================================================
+function updateUI(){
+  var d=DATA[bond],st=d.steps[step],acc=d.accent;
+  document.getElementById('sTitle').textContent=st.title;
+  document.getElementById('sTitle').style.color=acc;
+  document.getElementById('sDesc').textContent=st.desc;
+
+  var dotsEl=document.getElementById('dotsEl');
+  dotsEl.innerHTML='';
+  d.steps.forEach(function(_,i){
+    var dot=document.createElement('div');dot.className='dot';
+    if(i===step){dot.style.background=acc;dot.style.border='none';}
+    dot.onclick=(function(ii){return function(){goStep(ii);};})(i);
+    dotsEl.appendChild(dot);
+  });
+
+  document.getElementById('prevBtn').disabled=(step===0);
+  var nxt=document.getElementById('nextBtn');
+  nxt.disabled=(step===d.steps.length-1);
+  nxt.style.background=acc;
+
+  ['ionic','cov','met'].forEach(function(b){
+    var el=document.getElementById('tab-'+b);
+    el.className='tab';
+    if(b===bond) el.classList.add(b==='ionic'?'ionic-active':b==='cov'?'cov-active':'met-active');
+  });
+
+  var cfg=document.getElementById('configEl');cfg.innerHTML='';
+  st.config.forEach(function(a){
+    var row=document.createElement('div');row.className='config-row';
+    var sym=document.createElement('div');sym.className='config-sym';
+    sym.style.color=acc;sym.textContent=a.sym;row.appendChild(sym);
+    var shells=document.createElement('div');shells.className='shells';
+    a.shells.forEach(function(n,i){
+      if(i>0){var sep=document.createElement('span');sep.className='shell-sep';sep.textContent='\u00b7';shells.appendChild(sep);}
+      var sn=document.createElement('div');
+      var cls='shell-n';
+      if(i===a.shells.length-1) cls+=' outer';
+      if(a.mode==='complete') cls+=' complete';
+      if((a.mode==='highlight-outer'||a.mode==='highlight-gap')&&i===a.shells.length-1) cls+=' highlighted';
+      sn.className=cls;
+      sn.textContent=n+(a.shared&&i===a.shells.length-1?'+'+a.shared:'');
+      shells.appendChild(sn);
+    });
+    row.appendChild(shells);
+    if(a.charge){
+      var b=document.createElement('span');b.className='charge-badge';
+      b.style.background=a.charge.indexOf('+')>=0?'rgba(255,100,60,0.2)':'rgba(0,220,120,0.2)';
+      b.style.color=a.charge.indexOf('+')>=0?'#ff8866':'#00e878';
+      b.textContent=a.charge;row.appendChild(b);
+    }
+    cfg.appendChild(row);
+  });
+}
+
+function switchBond(b){bond=b;step=0;transitionT=1;if(b==='met')initFree();updateUI();}
+function goStep(i){step=i;transitionT=0;transitionStart=performance.now();updateUI();}
+function nextStep(){var d=DATA[bond];if(step<d.steps.length-1){step++;transitionT=0;transitionStart=performance.now();updateUI();}}
+function prevStep(){if(step>0){step--;transitionT=0;transitionStart=performance.now();updateUI();}}
+
+initFree();
+initConfigToggle();
+switchBond('ionic');
+</script>
+</body>
+</html>
